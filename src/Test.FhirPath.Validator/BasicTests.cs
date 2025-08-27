@@ -963,6 +963,22 @@ namespace Test.Fhir.FhirPath.Validator
         }
 
         [TestMethod]
+        public void TestMethodIndex()
+        {
+            string expression = "name.select($index)";
+            Console.WriteLine(expression);
+            var visitor = new FhirPathExpressionVisitor();
+            visitor.AddInputType(typeof(Patient));
+            var pe = _compiler.Parse(expression);
+            Console.WriteLine("---------");
+            var r = pe.Accept(visitor);
+            Console.WriteLine(visitor.ToString());
+            Console.WriteLine(visitor.Outcome.ToXml(new FhirXmlSerializationSettings() { Pretty = true }));
+            Assert.IsTrue(visitor.Outcome.Success);
+            Assert.AreEqual("integer[]", r.ToString());
+        }
+
+        [TestMethod]
 		public void TestMethodIs()
 		{
 			string expression = "name.first().is(HumanName)";

@@ -1490,6 +1490,13 @@ namespace Hl7.Fhir.FhirPath.Validator
 					var context = _stackAggregateTotal.Peek();
 					r.CopyFrom(context);
 				}
+                Append("$total");
+                AppendLine($" : {r.TypeNames()}");
+                return r;
+            }
+            if (expression.Name == "builtin.index")
+            {
+                r.AddType(_mi, typeof(Hl7.Fhir.Model.Integer));
 				Append("$total");
 				AppendLine($" : {r.TypeNames()}");
 				return r;
