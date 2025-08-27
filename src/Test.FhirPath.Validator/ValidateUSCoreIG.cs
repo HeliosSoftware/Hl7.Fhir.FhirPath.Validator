@@ -122,6 +122,7 @@ namespace Test.Fhir.FhirPath.Validator
                     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab us-core-4",
                     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-clinical-result us-core-3",
                     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole us-core-13",
+                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole pd-1",
                 };
 
                 return InvariantsInIG("hl7.fhir.us.core", "6.1.0", knownBadInvariants);
