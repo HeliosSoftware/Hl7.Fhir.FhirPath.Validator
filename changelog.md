@@ -7,6 +7,7 @@
 * Update FirelySDK dependency to 5.12.2
 * Include support for $index return type checking
 * Support contexts for datatypes and not just resource types (and still handle the %resource/%rootResource variables)
+* Include function definitions for new stu fhirpath functions like precision, yearOf, monthOf ... timeOf
 
 ### 25 July 2025:
 * Update the scope of processing variables to be $this rather than the functions input collection.
