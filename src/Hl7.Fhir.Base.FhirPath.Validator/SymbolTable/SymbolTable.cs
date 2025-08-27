@@ -23,7 +23,20 @@ namespace Hl7.Fhir.FhirPath.Validator
 			Add(new FunctionDefinition("lowBoundary").AddContexts(mi, "date-date,instant-instant,decimal-decimal,integer-integer,dateTime-dateTime,time-time,Quantity-Quantity"));
 			Add(new FunctionDefinition("highBoundary").AddContexts(mi, "date-date,instant-instant,decimal-decimal,integer-integer,dateTime-dateTime,time-time,Quantity-Quantity"));
 
-			Add(new FunctionDefinition("length").AddContexts(mi, "string-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("precision").AddContexts(mi, "decimal-integer,date-integer,dateTime-integer,Time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("yearOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("monthOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("dayOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("hourOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("hourOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("minuteOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("secondOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("millisecondOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("timezoneOffsetOf").AddContexts(mi, "dateTime-decimal")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("dateOf").AddContexts(mi, "dateTime-date")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("timeOf").AddContexts(mi, "dateTime-time")).Validations.Add(ValidateNoArguments);
+
+            Add(new FunctionDefinition("length").AddContexts(mi, "string-integer")).Validations.Add(ValidateNoArguments);
 			Add(new FunctionDefinition("indexOf").AddContexts(mi, "string-integer")).Validations.Add(ValidateRequiredStringFirstArgument);
 
 			Add(new FunctionDefinition("toBoolean").AddContexts(mi, "boolean-boolean,integer-boolean,decimal-boolean,string-boolean")).Validations.Add(ValidateNoArguments);
