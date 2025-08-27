@@ -3,6 +3,9 @@
 
 ## Change log ##
 
+### 28 August 2025:
+* Update FirelySDK dependency to 5.12.2
+
 ### 25 July 2025:
 * Update the scope of processing variables to be $this rather than the functions input collection.
 * Additional validation processing for operations - `in` and non collection operators.
