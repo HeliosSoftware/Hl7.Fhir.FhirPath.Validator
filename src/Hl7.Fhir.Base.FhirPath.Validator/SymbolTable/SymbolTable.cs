@@ -28,7 +28,6 @@ namespace Hl7.Fhir.FhirPath.Validator
             Add(new FunctionDefinition("monthOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("dayOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("hourOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
-            Add(new FunctionDefinition("hourOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("minuteOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("secondOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("millisecondOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
