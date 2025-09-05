@@ -169,3 +169,4 @@ dist/
 /src/infer-out
 /src/.infersharpconfig
 /src/Hl7.Fhir.VersionConverters
+/static/results
