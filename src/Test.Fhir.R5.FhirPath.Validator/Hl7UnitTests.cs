@@ -21,6 +21,58 @@ using Test.Fhir.R5.FhirPath.Validator;
 namespace Test.Fhir.FhirPath.Validator
 {
 	/// <summary>
+	/// Configuration helper to handle CLI arguments, environment variables, and defaults
+	/// </summary>
+	public static class TestConfiguration
+	{
+		private static Dictionary<string, string> _cliArgs;
+
+		static TestConfiguration()
+		{
+			_cliArgs = ParseCommandLineArgs();
+		}
+
+		private static Dictionary<string, string> ParseCommandLineArgs()
+		{
+			var args = new Dictionary<string, string>();
+			var commandLineArgs = Environment.GetCommandLineArgs();
+
+			for (int i = 0; i < commandLineArgs.Length - 1; i++)
+			{
+				var arg = commandLineArgs[i];
+				if (arg.StartsWith("--"))
+				{
+					var key = arg.Substring(2);
+					var value = commandLineArgs[i + 1];
+					if (!value.StartsWith("--"))
+					{
+						args[key] = value;
+						i++; // Skip the value in next iteration
+					}
+				}
+			}
+			return args;
+		}
+
+		public static string GetConfigValue(string cliArgName, string envVarName, string defaultValue)
+		{
+			// Priority: CLI args → Environment variables → Defaults
+			if (_cliArgs.ContainsKey(cliArgName))
+				return _cliArgs[cliArgName];
+
+			var envValue = Environment.GetEnvironmentVariable(envVarName);
+			if (!string.IsNullOrEmpty(envValue))
+				return envValue;
+
+			return defaultValue;
+		}
+
+		public static string FhirTestFile => GetConfigValue("fhir-test-file", "FHIR_TEST_FILE", @"c:\git\hl7\fhir-test-cases\r5\fhirpath\tests-fhir-r5.xml");
+		public static string FhirTestBasePath => GetConfigValue("fhir-test-base-path", "FHIR_TEST_BASE_PATH", @"c:\git\hl7\fhir-test-cases\r5\");
+		public static string FhirPathResultsPath => GetConfigValue("fhirpath-results-path", "FHIRPATH_RESULTS_PATH", @"C:\git\Production\fhirpath-lab\static\results");
+	}
+
+	/// <summary>
 	/// Run all the tests from here (R4B) https://github.com/FHIR/fhir-test-cases
 	/// </summary>
 	[TestClass]
@@ -81,8 +133,8 @@ namespace Test.Fhir.FhirPath.Validator
 			get
 			{
 				var result = new List<TestData>();
-				string testFileXml = Environment.GetEnvironmentVariable("FHIR_TEST_FILE") ?? @"c:\git\hl7\fhir-test-cases\r5\fhirpath\tests-fhir-r5.xml";
-				string testBasePath = Environment.GetEnvironmentVariable("FHIR_TEST_BASE_PATH") ?? @"c:\git\hl7\fhir-test-cases\r5\";
+				string testFileXml = TestConfiguration.FhirTestFile;
+				string testBasePath = TestConfiguration.FhirTestBasePath;
 				XmlSerializer serializer = new XmlSerializer(typeof(Tests));
 				var jsonSettings = new FhirJsonPocoDeserializerSettings() { Validator = null, AnnotateResourceParseExceptions = true, ValidateOnFailedParse = false };
 				var jsonDS = new FhirJsonPocoDeserializer(jsonSettings);
@@ -370,7 +422,7 @@ namespace Test.Fhir.FhirPath.Validator
 		public void RecordResult(string engineName, string groupName, string testName, string testDescription, string expression, bool testPass, string failureMessage = null)
 		{
 			// Serialize the results 
-			string fileName = Path.Combine(Environment.GetEnvironmentVariable("FHIRPATH_RESULTS_PATH") ?? @"C:\git\Production\fhirpath-lab\static\results", $"{engineName.Replace("(", "").Replace(")", "")}.json");
+			string fileName = Path.Combine(TestConfiguration.FhirPathResultsPath, $"{engineName.Replace("(", "").Replace(")", "")}.json");
 			TestCaseResultOutputFile results = new TestCaseResultOutputFile();
 			results.EngineName = engineName;
 			string jsonContent = null;
