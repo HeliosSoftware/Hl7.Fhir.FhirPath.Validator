@@ -487,11 +487,7 @@ namespace Test.Fhir.FhirPath.Validator
 
 		public static IEnumerable<ServerDetails> servers = new List<ServerDetails>
 		{
-			new ServerDetails("Firely-5.11.4 (R5)", "https://fhirpath-lab-dotnet2.azurewebsites.net/api", "fhirpath-r5"),
-			new ServerDetails("fhirpath.js-4.4.0 (r5)", "http://localhost:3000/api", "fhirpath-r5"),
-			new ServerDetails("Java 6.5.27 (R5)", "https://fhirpath-lab-java-g5c4bfdrb8ejamar.australiaeast-01.azurewebsites.net/fhir5", "fhirpath-r5"),
-			new ServerDetails("fhirpath-py 1.0.3", "https://fhirpath.emr.beda.software/fhir", "fhirpath"),
-			new ServerDetails("Aidbox", "https://fhir-validator.aidbox.app/r5", "", "Aidbox FHIR R5"),
+			new ServerDetails("Helios Software (R5)", "https://fhirpath.heliossoftware.com/r5", "", "Helios Software r5"),
 		};
 
 		public static IEnumerable<object[]> TestDataKeysForServers
