@@ -121,11 +121,22 @@ The project uses these major NuGet packages:
 
 The R5 unit tests can be configured using CLI arguments, environment variables, or will fall back to default values. The priority order is: **CLI Arguments** → **Environment Variables** → **Default Values**.
 
+> **Note:** The default values assume that the [fhir-test-cases](https://github.com/FHIR/fhir-test-cases) repository is cloned at the same level as this project:
+> ```
+> parent-directory/
+> ├── Hl7.Fhir.FhirPath.Validator/    (this project)
+> └── fhir-test-cases/                (FHIR test cases repo)
+>     └── r5/
+>         ├── fhirpath/
+>         │   └── tests-fhir-r5.xml
+>         └── examples/
+> ```
+
 | CLI Argument | Environment Variable | Description | Default Value |
 |-------------|---------------------|-------------|---------------|
-| `--fhir-test-file` | `FHIR_TEST_FILE` | Path to the FHIR test cases XML file | `c:\git\hl7\fhir-test-cases\r5\fhirpath\tests-fhir-r5.xml` |
-| `--fhir-test-base-path` | `FHIR_TEST_BASE_PATH` | Base path for FHIR test case files | `c:\git\hl7\fhir-test-cases\r5\` |
-| `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `C:\git\Production\fhirpath-lab\static\results` |
+| `--fhir-test-file` | `FHIR_TEST_FILE` | Path to the FHIR test cases XML file | `../fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml` |
+| `--fhir-test-base-path` | `FHIR_TEST_BASE_PATH` | Base path for FHIR test case files | `../fhir-test-cases/r5/` |
+| `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `./static/results` |
 
 ### Using CLI Arguments (Highest Priority)
 
