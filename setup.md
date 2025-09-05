@@ -175,7 +175,35 @@ $env:FHIRPATH_RESULTS_PATH = "c:\your\custom\path\results"
 
 ## Running Tests
 
-### Run All Tests
+### Console Application (Recommended for CI/CD)
+
+The test project can be run as a console application that returns proper exit codes for build pipelines:
+
+```bash
+# Build and run the console application
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
+
+# Or build first, then run the executable
+dotnet build src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
+dotnet src/Test.Fhir.R5.FhirPath.Validator/bin/Debug/net80/Test.Fhir.R5.FhirPath.Validator.dll
+```
+
+**Exit Codes:**
+- `0` - All tests passed (success)
+- `1` - One or more tests failed
+- `2` - Fatal error occurred
+
+**With CLI Arguments:**
+```bash
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --fhir-test-base-path "path/to/base/"
+```
+
+**Help:**
+```bash
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --help
+```
+
+### Traditional MSTest Runner
 
 ```bash
 dotnet test src/Hl7.FhirPath.Validator.sln
@@ -274,13 +302,78 @@ For development work:
    - The project uses Git Flow branching strategy
    - Submit pull requests to the develop branch
 
+## CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+name: FHIR FhirPath Validation Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Checkout fhir-test-cases
+      uses: actions/checkout@v4
+      with:
+        repository: FHIR/fhir-test-cases
+        path: fhir-test-cases
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore src/Hl7.FhirPath.Validator.sln
+    
+    - name: Build
+      run: dotnet build src/Hl7.FhirPath.Validator.sln --no-restore
+    
+    - name: Run FhirPath Validation Tests
+      run: dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --no-build
+```
+
+### Azure DevOps Pipeline Example
+
+```yaml
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    version: '8.0.x'
+
+- checkout: self
+- checkout: git://FHIR/fhir-test-cases@main
+
+- script: dotnet restore src/Hl7.FhirPath.Validator.sln
+  displayName: 'Restore packages'
+
+- script: dotnet build src/Hl7.FhirPath.Validator.sln --no-restore
+  displayName: 'Build solution'
+
+- script: dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --no-build
+  displayName: 'Run FhirPath validation tests'
+```
+
 ## Next Steps
 
 After successful setup:
 
-1. Explore the unit tests in `Test.Fhir.R5.FhirPath.Validator/BasicTests.cs`
+1. Explore the unit tests in `Test.Fhir.R5.FhirPath.Validator/Hl7UnitTests.cs`
 2. Review the core validation logic in `BaseFhirPathExpressionVisitor.cs`
 3. Try validating your own FhirPath expressions using the examples above
+4. Set up CI/CD integration using the examples above
 
 ## Support
 
