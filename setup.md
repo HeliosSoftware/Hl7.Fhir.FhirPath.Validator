@@ -115,6 +115,39 @@ The project uses these major NuGet packages:
 - **Microsoft.NET.Test.Sdk** - Testing framework
 - **MSTest.TestAdapter/TestFramework** - Unit testing
 
+## Configuration
+
+### Environment Variables
+
+The R5 unit tests can be configured using environment variables to specify custom paths for FHIR test cases:
+
+| Environment Variable | Description | Default Value |
+|---------------------|-------------|---------------|
+| `FHIR_TEST_FILE` | Path to the FHIR test cases XML file | `c:\git\hl7\fhir-test-cases\r5\fhirpath\tests-fhir-r5.xml` |
+| `FHIR_TEST_BASE_PATH` | Base path for FHIR test case files | `c:\git\hl7\fhir-test-cases\r5\` |
+| `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `C:\git\Production\fhirpath-lab\static\results` |
+
+**Setting Environment Variables:**
+
+**Windows Command Prompt:**
+```cmd
+set FHIR_TEST_FILE=c:\your\custom\path\tests-fhir-r5.xml
+set FHIR_TEST_BASE_PATH=c:\your\custom\path\r5\
+set FHIRPATH_RESULTS_PATH=c:\your\custom\path\results
+```
+
+**Windows PowerShell:**
+```powershell
+$env:FHIR_TEST_FILE = "c:\your\custom\path\tests-fhir-r5.xml"
+$env:FHIR_TEST_BASE_PATH = "c:\your\custom\path\r5\"
+$env:FHIRPATH_RESULTS_PATH = "c:\your\custom\path\results"
+```
+
+**System Environment Variables (Persistent):**
+1. Open System Properties → Advanced → Environment Variables
+2. Add new variables under "User variables" or "System variables"
+3. Restart your IDE/command prompt to pick up the changes
+
 ## Running Tests
 
 ### Run All Tests

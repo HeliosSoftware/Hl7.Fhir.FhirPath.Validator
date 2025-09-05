@@ -1,4 +1,4 @@
-﻿using Hl7.Fhir.ElementModel;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.FhirPath;
 using Hl7.Fhir.FhirPath.Validator;
 using Hl7.Fhir.Model;
@@ -81,8 +81,8 @@ namespace Test.Fhir.FhirPath.Validator
 			get
 			{
 				var result = new List<TestData>();
-				string testFileXml = @"c:\git\hl7\fhir-test-cases\r5\fhirpath\tests-fhir-r5.xml";
-				string testBasePath = @"c:\git\hl7\fhir-test-cases\r5\";
+				string testFileXml = Environment.GetEnvironmentVariable("FHIR_TEST_FILE") ?? @"c:\git\hl7\fhir-test-cases\r5\fhirpath\tests-fhir-r5.xml";
+				string testBasePath = Environment.GetEnvironmentVariable("FHIR_TEST_BASE_PATH") ?? @"c:\git\hl7\fhir-test-cases\r5\";
 				XmlSerializer serializer = new XmlSerializer(typeof(Tests));
 				var jsonSettings = new FhirJsonPocoDeserializerSettings() { Validator = null, AnnotateResourceParseExceptions = true, ValidateOnFailedParse = false };
 				var jsonDS = new FhirJsonPocoDeserializer(jsonSettings);
@@ -370,7 +370,7 @@ namespace Test.Fhir.FhirPath.Validator
 		public void RecordResult(string engineName, string groupName, string testName, string testDescription, string expression, bool testPass, string failureMessage = null)
 		{
 			// Serialize the results 
-			string fileName = Path.Combine(@"C:\git\Production\fhirpath-lab\static\results", $"{engineName.Replace("(", "").Replace(")", "")}.json");
+			string fileName = Path.Combine(Environment.GetEnvironmentVariable("FHIRPATH_RESULTS_PATH") ?? @"C:\git\Production\fhirpath-lab\static\results", $"{engineName.Replace("(", "").Replace(")", "")}.json");
 			TestCaseResultOutputFile results = new TestCaseResultOutputFile();
 			results.EngineName = engineName;
 			string jsonContent = null;
