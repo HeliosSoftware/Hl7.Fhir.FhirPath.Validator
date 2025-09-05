@@ -45,9 +45,61 @@ The library depends on several NuGet packages (notably):
 
 ## Getting Started ##
 
-TODO: But best place to start is to look at the unit tests.
+The best place to start is to look at the unit tests and the console application runner.
 
-To date they are covering verifying the R4B and R5 Search Parameters.
+### Running Tests
+
+The project includes a console application that can run all tests and return proper exit codes for CI/CD pipelines:
+
+```bash
+# Build and run the console application
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
+
+# With custom configuration
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml"
+```
+
+**Exit Codes:**
+- `0` - All tests passed (success)
+- `1` - One or more tests failed
+- `2` - Fatal error occurred
+
+### Known Test Failures
+
+The test runner supports a `known-test-failures.json` file in the project root to ignore expected failures when determining overall success. This allows CI/CD pipelines to pass even when there are known issues being tracked.
+
+Example `known-test-failures.json`:
+```json
+{
+  "description": "Known test failures that should be ignored when determining overall test success",
+  "version": "1.0",
+  "knownFailures": [
+    {
+      "groupName": "PrecisionDecimal",
+      "testName": "*",
+      "reason": "Precision decimal handling not fully implemented",
+      "issueUrl": "https://github.com/HeliosSoftware/Hl7.Fhir.FhirPath.Validator/issues/123"
+    }
+  ]
+}
+```
+
+The test runner will:
+- Mark matching failures as "KNOWN FAILURE" instead of "FAILED"
+- Include known failures in the summary but not count them toward the exit code
+- Return success (exit code 0) if only known failures occur
+
+### Configuration
+
+Tests can be configured via CLI arguments, environment variables, or defaults:
+
+| CLI Argument | Environment Variable | Description | Default Value |
+|-------------|---------------------|-------------|---------------|
+| `--fhir-test-file` | `FHIR_TEST_FILE` | Path to the FHIR test cases XML file | `../fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml` |
+| `--fhir-test-base-path` | `FHIR_TEST_BASE_PATH` | Base path for FHIR test case files | `../fhir-test-cases/r5/` |
+| `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `./static/results` |
+
+To date the tests cover verifying the R4B and R5 Search Parameters and FhirPath expressions from the official FHIR test cases.
 
 ## Support ##
 None officially.

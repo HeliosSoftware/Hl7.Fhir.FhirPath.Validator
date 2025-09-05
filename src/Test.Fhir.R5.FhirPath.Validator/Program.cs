@@ -1,14 +1,33 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Fhir.FhirPath.Validator;
 
 namespace Test.Fhir.R5.FhirPath.Validator
 {
+    public class KnownFailure
+    {
+        public string groupName { get; set; }
+        public string testName { get; set; }
+        public string reason { get; set; }
+        public string issueUrl { get; set; }
+    }
+
+    public class KnownTestFailures
+    {
+        public string description { get; set; }
+        public string version { get; set; }
+        public List<KnownFailure> knownFailures { get; set; } = new List<KnownFailure>();
+    }
+
     class Program
     {
+        private static KnownTestFailures _knownFailures;
+
         static int Main(string[] args)
         {
             Console.WriteLine("FHIR R5 FhirPath Validator Test Runner");
@@ -19,6 +38,9 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 // Parse command line arguments for test configuration
                 ParseArguments(args);
                 
+                // Load known test failures
+                LoadKnownTestFailures();
+                
                 // Initialize the test class
                 var testInstance = new Hl7UnitTestFileR5();
                 testInstance.Init();
@@ -27,6 +49,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 Console.WriteLine($"  Test File: {TestConfiguration.FhirTestFile}");
                 Console.WriteLine($"  Base Path: {TestConfiguration.FhirTestBasePath}");
                 Console.WriteLine($"  Results Path: {TestConfiguration.FhirPathResultsPath}");
+                Console.WriteLine($"  Known Failures: {_knownFailures?.knownFailures?.Count ?? 0} defined");
                 Console.WriteLine();
                 
                 // Get all test data
@@ -37,6 +60,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 int passed = 0;
                 int failed = 0;
                 int skipped = 0;
+                int knownFailures = 0;
                 
                 foreach (var test in testData)
                 {
@@ -63,13 +87,29 @@ namespace Test.Fhir.R5.FhirPath.Validator
                     }
                     catch (AssertFailedException ex)
                     {
-                        Console.WriteLine($"FAILED - {ex.Message}");
-                        failed++;
+                        if (IsKnownFailure(groupName, testName))
+                        {
+                            Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                            knownFailures++;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"FAILED - {ex.Message}");
+                            failed++;
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"ERROR - {ex.Message}");
-                        failed++;
+                        if (IsKnownFailure(groupName, testName))
+                        {
+                            Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                            knownFailures++;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ERROR - {ex.Message}");
+                            failed++;
+                        }
                     }
                 }
                 
@@ -77,6 +117,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 Console.WriteLine("Test Results:");
                 Console.WriteLine($"  Passed: {passed}");
                 Console.WriteLine($"  Failed: {failed}");
+                Console.WriteLine($"  Known Failures: {knownFailures}");
                 Console.WriteLine($"  Skipped: {skipped}");
                 Console.WriteLine($"  Total: {testData.Count}");
                 
@@ -84,12 +125,20 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 {
                     Console.WriteLine();
                     Console.WriteLine("❌ Tests FAILED");
+                    Console.WriteLine($"   {failed} unexpected failures occurred (known failures are ignored)");
                     return 1; // Exit code 1 indicates failure
                 }
                 else
                 {
                     Console.WriteLine();
-                    Console.WriteLine("✅ All tests PASSED");
+                    if (knownFailures > 0)
+                    {
+                        Console.WriteLine($"✅ All tests PASSED ({knownFailures} known failures ignored)");
+                    }
+                    else
+                    {
+                        Console.WriteLine("✅ All tests PASSED");
+                    }
                     return 0; // Exit code 0 indicates success
                 }
             }
@@ -101,6 +150,41 @@ namespace Test.Fhir.R5.FhirPath.Validator
             }
         }
         
+        private static void LoadKnownTestFailures()
+        {
+            string knownFailuresPath = Path.Combine(Directory.GetCurrentDirectory(), "known-test-failures.json");
+            
+            if (File.Exists(knownFailuresPath))
+            {
+                try
+                {
+                    string json = File.ReadAllText(knownFailuresPath);
+                    _knownFailures = JsonSerializer.Deserialize<KnownTestFailures>(json);
+                    Console.WriteLine($"Loaded {_knownFailures?.knownFailures?.Count ?? 0} known test failures from {knownFailuresPath}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Could not load known-test-failures.json: {ex.Message}");
+                    _knownFailures = new KnownTestFailures();
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No known-test-failures.json found at {knownFailuresPath}");
+                _knownFailures = new KnownTestFailures();
+            }
+        }
+
+        private static bool IsKnownFailure(string groupName, string testName)
+        {
+            if (_knownFailures?.knownFailures == null)
+                return false;
+
+            return _knownFailures.knownFailures.Any(kf => 
+                (kf.groupName == groupName || kf.groupName == "*") &&
+                (kf.testName == testName || kf.testName == "*"));
+        }
+
         private static void ParseArguments(string[] args)
         {
             // Arguments are already parsed by TestConfiguration class
