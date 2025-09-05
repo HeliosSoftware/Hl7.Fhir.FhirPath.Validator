@@ -152,9 +152,24 @@ namespace Test.Fhir.R5.FhirPath.Validator
         
         private static void LoadKnownTestFailures()
         {
-            string knownFailuresPath = Path.Combine(Directory.GetCurrentDirectory(), "known-test-failures.json");
+            // Try multiple locations for known-test-failures.json
+            string[] possiblePaths = {
+                Path.Combine(Directory.GetCurrentDirectory(), "static", "known-test-failures.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "known-test-failures.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "static", "known-test-failures.json")
+            };
             
-            if (File.Exists(knownFailuresPath))
+            string knownFailuresPath = null;
+            foreach (var path in possiblePaths)
+            {
+                if (File.Exists(path))
+                {
+                    knownFailuresPath = path;
+                    break;
+                }
+            }
+            
+            if (knownFailuresPath != null)
             {
                 try
                 {
@@ -170,7 +185,11 @@ namespace Test.Fhir.R5.FhirPath.Validator
             }
             else
             {
-                Console.WriteLine($"No known-test-failures.json found at {knownFailuresPath}");
+                Console.WriteLine($"No known-test-failures.json found in any of the expected locations:");
+                foreach (var path in possiblePaths)
+                {
+                    Console.WriteLine($"  - {path}");
+                }
                 _knownFailures = new KnownTestFailures();
             }
         }

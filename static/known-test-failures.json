@@ -1,0 +1,84 @@
+{
+  "description": "Known test failures for FHIR R5 FhirPath Validator",
+  "version": "1.0.0",
+  "knownFailures": [
+    {
+      "groupName": "TerminologyTests",
+      "testName": "txTest01",
+      "reason": "Variable 'terminologies' not found - requires terminology server integration",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/terminology-support"
+    },
+    {
+      "groupName": "TerminologyTests", 
+      "testName": "txTest02",
+      "reason": "Unhandled function 'translate' - terminology function not implemented",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/terminology-functions"
+    },
+    {
+      "groupName": "TerminologyTests",
+      "testName": "txTest03", 
+      "reason": "Property 'parameter' not found - terminology result structure mismatch",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/terminology-parameters"
+    },
+    {
+      "groupName": "testInheritance",
+      "testName": "testFHIRPathAsFunction18",
+      "reason": "Unhandled function 'expand' - ValueSet expansion not implemented",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/valueset-expansion"
+    },
+    {
+      "groupName": "testInheritance", 
+      "testName": "testFHIRPathAsFunction19",
+      "reason": "Property 'expansion' not found on ValueSet - expansion structure missing",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/valueset-structure"
+    },
+    {
+      "groupName": "testInheritance",
+      "testName": "testFHIRPathAsFunction20",
+      "reason": "Property 'contains' not found - ValueSet contains structure missing", 
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/valueset-contains"
+    },
+    {
+      "groupName": "testInheritance",
+      "testName": "testFHIRPathAsFunction21",
+      "reason": "Property 'part' not found - ConceptMap parameter structure missing",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/conceptmap-structure"
+    },
+    {
+      "groupName": "testInheritance",
+      "testName": "testFHIRPathAsFunction22", 
+      "reason": "Property 'value' not found - ConceptMap result structure missing",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/conceptmap-values"
+    },
+    {
+      "groupName": "testInheritance",
+      "testName": "testFHIRPathAsFunction23",
+      "reason": "Property 'code' not found - ConceptMap coding structure missing",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/conceptmap-coding"
+    },
+    {
+      "groupName": "miscEngineTests",
+      "testName": "testMultipleResolve",
+      "reason": "Multiple matches error - collection handling issue in resolve function",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/resolve-collections"
+    },
+    {
+      "groupName": "Precision",
+      "testName": "*",
+      "reason": "Precision function tests may have duplicate names causing test conflicts",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/duplicate-test-names"
+    },
+    {
+      "groupName": "HighBoundary",
+      "testName": "*", 
+      "reason": "HighBoundary function not fully implemented for all data types",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/highboundary-implementation"
+    },
+    {
+      "groupName": "Comparable",
+      "testName": "*",
+      "reason": "Comparable function for units may not be fully implemented",
+      "issueUrl": "https://github.com/HL7/fhir-test-cases/issues/comparable-units"
+    }
+  ]
+}
