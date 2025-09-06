@@ -69,6 +69,7 @@ jobs:
         run: dotnet restore src/Hl7.FhirPath.Validator.sln
 
       - name: Publish R5 Validator Console App
+        shell: bash
         run: |
           dotnet publish src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj \
             --configuration Release \
