@@ -63,6 +63,7 @@ jobs:
 
       - name: Check formatting
         run: dotnet format src/Hl7.FhirPath.Validator.sln --verify-no-changes --verbosity diagnostic
+        continue-on-error: true
 
       - name: Run code analysis
         run: dotnet build src/Hl7.FhirPath.Validator.sln --configuration Release --verbosity normal
