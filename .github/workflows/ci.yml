@@ -105,7 +105,8 @@ jobs:
 
       - name: Build and pack
         run: |
-          dotnet pack src/Hl7.FhirPath.Validator.sln --configuration Release --no-restore --output ./packages
+          dotnet pack src/Hl7.Fhir.R5.FhirPath.Validator/Hl7.Fhir.R5.FhirPath.Validator.csproj --configuration Release --no-restore --output ./packages
+          dotnet pack src/Hl7.Fhir.Base.FhirPath.Validator/Hl7.Fhir.Base.FhirPath.Validator.csproj --configuration Release --no-restore --output ./packages
 
       - name: Upload NuGet packages
         uses: actions/upload-artifact@v4
