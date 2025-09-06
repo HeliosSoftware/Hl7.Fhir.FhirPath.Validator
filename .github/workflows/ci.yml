@@ -44,14 +44,7 @@ jobs:
         run: dotnet build src/Hl7.FhirPath.Validator.sln --configuration Release --no-restore
 
       - name: Run unit tests
-        run: dotnet test src/Hl7.FhirPath.Validator.sln --configuration Release --no-build --verbosity normal --logger trx --results-directory TestResults
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-${{ matrix.dotnet-version }}
-          path: TestResults/*.trx
+        run: dotnet test src/Hl7.FhirPath.Validator.sln --configuration Release --no-build --verbosity normal
 
   lint:
     name: Code Quality
@@ -92,7 +85,6 @@ jobs:
       - name: Run security scan
         run: |
           dotnet list src/Hl7.FhirPath.Validator.sln package --vulnerable --include-transitive || true
-
 
   build-packages:
     name: Build NuGet Packages
