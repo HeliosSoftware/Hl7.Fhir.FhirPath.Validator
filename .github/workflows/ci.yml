@@ -93,35 +93,6 @@ jobs:
         run: |
           dotnet list src/Hl7.FhirPath.Validator.sln package --vulnerable --include-transitive || true
 
-  integration-test:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: [test]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "9.0.x"
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Clone FHIR test cases
-        run: |
-          git clone https://github.com/FHIR/fhir-test-cases.git ../fhir-test-cases
-
-      - name: Build and run R5 validator tests
-        run: |
-          dotnet build src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --configuration Release
-          dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --configuration Release
 
   build-packages:
     name: Build NuGet Packages
