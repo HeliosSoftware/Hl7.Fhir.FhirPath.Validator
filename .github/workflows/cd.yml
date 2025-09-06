@@ -145,7 +145,7 @@ jobs:
           cat > installer/FhirPathValidator.wxs << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
           <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-            <Package Id="*" Name="FHIR Path Validator" Language="1033" Version="${{ steps.version.outputs.VERSION }}" 
+            <Package Name="FHIR Path Validator" Language="1033" Version="${{ steps.version.outputs.VERSION }}" 
                      Manufacturer="Helios Software" UpgradeCode="12345678-1234-1234-1234-123456789012">
               <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
               <MediaTemplate EmbedCab="yes" />
@@ -153,15 +153,11 @@ jobs:
               <Feature Id="ProductFeature" Title="FHIR Path Validator" Level="1">
                 <ComponentGroupRef Id="ProductComponents" />
               </Feature>
+              
+              <StandardDirectory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="FhirPathValidator" />
+              </StandardDirectory>
             </Package>
-            
-            <Fragment>
-              <Directory Id="TARGETDIR" Name="SourceDir">
-                <Directory Id="ProgramFilesFolder">
-                  <Directory Id="INSTALLFOLDER" Name="FhirPathValidator" />
-                </Directory>
-              </Directory>
-            </Fragment>
             
             <Fragment>
               <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
