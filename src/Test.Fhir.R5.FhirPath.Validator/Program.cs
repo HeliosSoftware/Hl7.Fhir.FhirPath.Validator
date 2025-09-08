@@ -182,12 +182,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 try
                 {
                     string json = File.ReadAllText(knownFailuresPath);
-                    var jsonOptions = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        IgnoreUnknownProperties = true
-                    };
-                    _knownFailures = JsonSerializer.Deserialize<KnownTestFailures>(json, jsonOptions);
+                    _knownFailures = JsonSerializer.Deserialize<KnownTestFailures>(json);
                     Console.WriteLine($"Loaded {_knownFailures?.knownFailures?.Count ?? 0} known test failures from {knownFailuresPath}");
                 }
                 catch (Exception ex)
