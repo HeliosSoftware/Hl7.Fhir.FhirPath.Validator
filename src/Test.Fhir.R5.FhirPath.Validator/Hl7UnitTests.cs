@@ -70,6 +70,7 @@ namespace Test.Fhir.FhirPath.Validator
 		public static string FhirTestFile => GetConfigValue("fhir-test-file", "FHIR_TEST_FILE", @"../fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml");
 		public static string FhirTestBasePath => GetConfigValue("fhir-test-base-path", "FHIR_TEST_BASE_PATH", @"../fhir-test-cases/r5/");
 		public static string FhirPathResultsPath => GetConfigValue("fhirpath-results-path", "FHIRPATH_RESULTS_PATH", @"./static/results");
+		public static string KnownFailuresFile => GetConfigValue("known-failures", "KNOWN_TEST_FAILURES_FILE", "");
 	}
 
 	/// <summary>

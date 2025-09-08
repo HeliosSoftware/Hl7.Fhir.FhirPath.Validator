@@ -14,7 +14,6 @@ namespace Test.Fhir.R5.FhirPath.Validator
         public string groupName { get; set; }
         public string testName { get; set; }
         public string reason { get; set; }
-        public string issueUrl { get; set; }
     }
 
     public class KnownTestFailures
@@ -153,11 +152,20 @@ namespace Test.Fhir.R5.FhirPath.Validator
         private static void LoadKnownTestFailures()
         {
             // Try multiple locations for known-test-failures.json
-            string[] possiblePaths = {
-                Path.Combine(Directory.GetCurrentDirectory(), "static", "known-test-failures.json"),
-                Path.Combine(Directory.GetCurrentDirectory(), "known-test-failures.json"),
-                Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "static", "known-test-failures.json")
-            };
+            string configPath = TestConfiguration.KnownFailuresFile;
+            var possiblePaths = new List<string>();
+            if (!string.IsNullOrWhiteSpace(configPath))
+            {
+                possiblePaths.Add(Path.IsPathRooted(configPath)
+                    ? configPath
+                    : Path.Combine(Directory.GetCurrentDirectory(), configPath));
+            }
+            // Prioritize external usage patterns
+            possiblePaths.Add(Path.Combine(Directory.GetCurrentDirectory(), "known-test-failures.json"));
+            possiblePaths.Add(Path.Combine(Directory.GetCurrentDirectory(), "static", "known-test-failures.json"));
+            possiblePaths.Add(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "static", "known-test-failures.json"));
+            // Check for sample file last (example in this repo)
+            possiblePaths.Add(Path.Combine(Directory.GetCurrentDirectory(), "static", "known-test-failures.sample.json"));
             
             string knownFailuresPath = null;
             foreach (var path in possiblePaths)
@@ -174,7 +182,12 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 try
                 {
                     string json = File.ReadAllText(knownFailuresPath);
-                    _knownFailures = JsonSerializer.Deserialize<KnownTestFailures>(json);
+                    var jsonOptions = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        IgnoreUnknownProperties = true
+                    };
+                    _knownFailures = JsonSerializer.Deserialize<KnownTestFailures>(json, jsonOptions);
                     Console.WriteLine($"Loaded {_knownFailures?.knownFailures?.Count ?? 0} known test failures from {knownFailuresPath}");
                 }
                 catch (Exception ex)
@@ -226,12 +239,14 @@ namespace Test.Fhir.R5.FhirPath.Validator
             Console.WriteLine("  --fhir-test-file <path>        Path to the FHIR test cases XML file");
             Console.WriteLine("  --fhir-test-base-path <path>   Base path for FHIR test case files");
             Console.WriteLine("  --fhirpath-results-path <path> Path to store test result JSON files");
+            Console.WriteLine("  --known-failures <path>         Path to known test failures JSON file (optional)");
             Console.WriteLine("  --help, -h                     Show this help message");
             Console.WriteLine();
             Console.WriteLine("Environment Variables:");
             Console.WriteLine("  FHIR_TEST_FILE                 Same as --fhir-test-file");
             Console.WriteLine("  FHIR_TEST_BASE_PATH            Same as --fhir-test-base-path");
             Console.WriteLine("  FHIRPATH_RESULTS_PATH          Same as --fhirpath-results-path");
+            Console.WriteLine("  KNOWN_TEST_FAILURES_FILE       Same as --known-failures");
             Console.WriteLine();
             Console.WriteLine("Exit Codes:");
             Console.WriteLine("  0 - All tests passed");
