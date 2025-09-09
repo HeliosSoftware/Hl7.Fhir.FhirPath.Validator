@@ -118,7 +118,18 @@ namespace Test.Fhir.FhirPath.Validator
 					_testData = new Dictionary<string, TestData>();
 					foreach (var inputData in ExpressionsInTests)
 					{
-						_testData.Add($"{inputData.groupName}.{inputData.testName}", inputData);
+						var baseKey = $"{inputData.groupName}.{inputData.testName}";
+						var uniqueKey = baseKey;
+						int counter = 1;
+						
+						// Handle duplicate keys by appending a counter
+						while (_testData.ContainsKey(uniqueKey))
+						{
+							uniqueKey = $"{baseKey}_{counter}";
+							counter++;
+						}
+						
+						_testData.Add(uniqueKey, inputData);
 					}
 				}
 				foreach (var key in _testData.Keys)
@@ -216,7 +227,7 @@ namespace Test.Fhir.FhirPath.Validator
 		[Ignore("TODO: Fix missing test data files - TestDataKeys returns empty IEnumerable")]
 		public void CheckStaticReturnTypes(string groupName, string testName)
 		{
-			var testData = _testData[$"{groupName}.{testName}"];
+			var testData = _testData.Values.FirstOrDefault(td => td.groupName == groupName && td.testName == testName);
 
 			// string expression = "(software.empty() and implementation.empty()) or kind != 'requirements'";
 			Console.WriteLine($"{groupName} - {testName}");
@@ -265,7 +276,7 @@ namespace Test.Fhir.FhirPath.Validator
 		[Ignore("TODO: Fix missing test data files - TestDataKeys returns empty IEnumerable")]
 		public void TestEvaluateExpression(string groupName, string testName)
 		{
-			var testData = _testData[$"{groupName}.{testName}"];
+			var testData = _testData.Values.FirstOrDefault(td => td.groupName == groupName && td.testName == testName);
 
 			// string expression = "(software.empty() and implementation.empty()) or kind != 'requirements'";
 			Console.WriteLine($"{groupName} - {testName}");
@@ -573,7 +584,7 @@ namespace Test.Fhir.FhirPath.Validator
 		public void TestEvaluateOnServer(string engineName, string groupName, string testName)
 		{
 			var serverDetails = servers.FirstOrDefault(s => s.EngineName == engineName);
-			var testData = _testData[$"{groupName}.{testName}"];
+			var testData = _testData.Values.FirstOrDefault(td => td.groupName == groupName && td.testName == testName);
 			engineName = serverDetails?.UseEngineName ?? engineName;
 
 			// string expression = "(software.empty() and implementation.empty()) or kind != 'requirements'";
