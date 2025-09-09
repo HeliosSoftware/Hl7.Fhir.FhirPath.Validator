@@ -168,10 +168,16 @@ namespace Test.Fhir.FhirPath.Validator
 								else if (File.Exists(Path.Combine(testBasePath, "examples", t.InputFile)))
 									content = System.IO.File.ReadAllText(Path.Combine(testBasePath, "examples", t.InputFile));
 								else
-									content = "??????";
+									throw new FileNotFoundException(
+										$"Could not find test input file '{t.InputFile}'. Searched: '" +
+										Path.Combine(testBasePath, t.InputFile) + "' and '" +
+										Path.Combine(testBasePath, "examples", t.InputFile) +
+										"'. Ensure the FHIR R5 example files are available and pass --fhir-test-base-path to their directory (e.g., the fhir-test-cases/r5 folder)."
+									);
 							}
 							else
 								content = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"pat1\"/></Patient>";
+
 							Resource r = null;
 							if (t.InputFile?.EndsWith("json") == true)
 								r = jsonDS.DeserializeResource(content);
