@@ -61,6 +61,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 int failed = 0;
                 int skipped = 0;
                 int knownFailures = 0;
+                int knownFailuresFixed = 0;
                 
                 foreach (var test in testData)
                 {
@@ -77,8 +78,16 @@ namespace Test.Fhir.R5.FhirPath.Validator
                         // Run TestEvaluateExpression test
                         testInstance.TestEvaluateExpression(groupName, testName);
                         
-                        Console.WriteLine("PASSED");
-                        passed++;
+                        if (IsKnownFailure(groupName, testName))
+                        {
+                            Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
+                            knownFailuresFixed++;
+                        }
+                        else
+                        {
+                            Console.WriteLine("PASSED");
+                            passed++;
+                        }
                     }
                     catch (AssertInconclusiveException ex)
                     {
@@ -118,14 +127,18 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 Console.WriteLine($"  Passed: {passed}");
                 Console.WriteLine($"  Failed: {failed}");
                 Console.WriteLine($"  Known Failures: {knownFailures}");
+                Console.WriteLine($"  Known Failures Resolved: {knownFailuresFixed}");
                 Console.WriteLine($"  Skipped: {skipped}");
                 Console.WriteLine($"  Total: {testData.Count}");
                 
-                if (failed > 0)
+                if (failed > 0 || knownFailuresFixed > 0)
                 {
                     Console.WriteLine();
                     Console.WriteLine("❌ Tests FAILED");
-                    Console.WriteLine($"   {failed} unexpected failures occurred (known failures are ignored)");
+                    if (failed > 0)
+                        Console.WriteLine($"   {failed} unexpected failures occurred");
+                    if (knownFailuresFixed > 0)
+                        Console.WriteLine($"   {knownFailuresFixed} known-failure test(s) unexpectedly PASSED. Update known-test-failures.json.");
                     return 1; // Exit code 1 indicates failure
                 }
                 else
