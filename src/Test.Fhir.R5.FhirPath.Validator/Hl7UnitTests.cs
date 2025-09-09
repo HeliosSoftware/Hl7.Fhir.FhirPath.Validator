@@ -71,6 +71,7 @@ namespace Test.Fhir.FhirPath.Validator
 		public static string FhirTestBasePath => GetConfigValue("fhir-test-base-path", "FHIR_TEST_BASE_PATH", @"../fhir-test-cases/r5/");
 		public static string FhirPathResultsPath => GetConfigValue("fhirpath-results-path", "FHIRPATH_RESULTS_PATH", @"./static/results");
 		public static string KnownFailuresFile => GetConfigValue("known-failures", "KNOWN_TEST_FAILURES_FILE", "");
+		public static string ServerUrl => GetConfigValue("url", "FHIR_VALIDATOR_URL", @"https://fhirpath.heliossoftware.com/r5");
 	}
 
 	/// <summary>
@@ -560,7 +561,7 @@ namespace Test.Fhir.FhirPath.Validator
 		public static IEnumerable<ServerDetails> servers = new List<ServerDetails>
 		{
 			//new ServerDetails("Helios Software (R5)", "http://127.0.0.1:8080/r5", "", "Helios Software r5"),
-			new ServerDetails("Helios Software (R5)", "https://fhirpath.heliossoftware.com/r5", "", "Helios Software r5"),
+			new ServerDetails("Helios Software (R5)", TestConfiguration.ServerUrl, "", "Helios Software r5"),
 		};
 
 		public static IEnumerable<object[]> TestDataKeysForServers
@@ -615,8 +616,6 @@ namespace Test.Fhir.FhirPath.Validator
 			// var engineName = "Java 6.5.27 (R5)";
 			// var serverUrl = "https://fhirpath-lab-java-g5c4bfdrb8ejamar.australiaeast-01.azurewebsites.net/fhir5"; // HAPI engine
 			// var serverUrl = "http://localhost:7071/api";
-
-			// var serverUrl = "https://fhir-validator.aidbox.app/r5"; // Aidbox engine
 
 			// var engineName = "fhirpath-py 1.0.3";
 			// var serverUrl = "https://fhirpath.emr.beda.software/fhir"; // Python engine

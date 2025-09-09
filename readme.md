@@ -56,7 +56,7 @@ The project includes a console application that can run all tests and return pro
 dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
 
 # With custom configuration
-dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml"
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --url "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **Exit Codes:**
@@ -121,6 +121,7 @@ Tests can be configured via CLI arguments, environment variables, or defaults:
 | `--fhir-test-base-path`   | `FHIR_TEST_BASE_PATH`      | Base path for FHIR test case files   | `../fhir-test-cases/r5/`                           |
 | `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH`    | Path to store test result JSON files | `./static/results`                                 |
 | `--known-failures`        | `KNOWN_TEST_FAILURES_FILE` | Path to known failures JSON file     | (none - uses fallback search)                      |
+| `--url`                   | `FHIR_VALIDATOR_URL`       | FHIRPath evaluation server URL       | `https://fhirpath.heliossoftware.com/r5`           |
 
 ## Support
 

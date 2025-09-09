@@ -132,17 +132,18 @@ The R5 unit tests can be configured using CLI arguments, environment variables, 
 >         └── examples/
 > ```
 
-| CLI Argument | Environment Variable | Description | Default Value |
-|-------------|---------------------|-------------|---------------|
-| `--fhir-test-file` | `FHIR_TEST_FILE` | Path to the FHIR test cases XML file | `../fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml` |
-| `--fhir-test-base-path` | `FHIR_TEST_BASE_PATH` | Base path for FHIR test case files | `../fhir-test-cases/r5/` |
-| `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `./static/results` |
+| CLI Argument              | Environment Variable    | Description                          | Default Value                                      |
+| ------------------------- | ----------------------- | ------------------------------------ | -------------------------------------------------- |
+| `--fhir-test-file`        | `FHIR_TEST_FILE`        | Path to the FHIR test cases XML file | `../fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml` |
+| `--fhir-test-base-path`   | `FHIR_TEST_BASE_PATH`   | Base path for FHIR test case files   | `../fhir-test-cases/r5/`                           |
+| `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `./static/results`                                 |
+| `--url`                   | `FHIR_VALIDATOR_URL`    | FHIRPath evaluation server URL       | `https://fhirpath.heliossoftware.com/r5`           |
 
 ### Using CLI Arguments (Highest Priority)
 
 **Running tests with custom paths:**
 ```bash
-dotnet test src/Hl7.FhirPath.Validator.sln -- --fhir-test-file "c:\your\custom\path\tests-fhir-r5.xml" --fhir-test-base-path "c:\your\custom\path\r5\" --fhirpath-results-path "c:\your\custom\path\results"
+dotnet test src/Hl7.FhirPath.Validator.sln -- --fhir-test-file "c:\your\custom\path\tests-fhir-r5.xml" --fhir-test-base-path "c:\your\custom\path\r5\" --fhirpath-results-path "c:\your\custom\path\results" --url "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **Running specific test project with CLI args:**
@@ -159,6 +160,7 @@ dotnet test src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.
 set FHIR_TEST_FILE=c:\your\custom\path\tests-fhir-r5.xml
 set FHIR_TEST_BASE_PATH=c:\your\custom\path\r5\
 set FHIRPATH_RESULTS_PATH=c:\your\custom\path\results
+set FHIR_VALIDATOR_URL=https://fhirpath.heliossoftware.com/r5
 ```
 
 **Windows PowerShell:**
@@ -166,6 +168,7 @@ set FHIRPATH_RESULTS_PATH=c:\your\custom\path\results
 $env:FHIR_TEST_FILE = "c:\your\custom\path\tests-fhir-r5.xml"
 $env:FHIR_TEST_BASE_PATH = "c:\your\custom\path\r5\"
 $env:FHIRPATH_RESULTS_PATH = "c:\your\custom\path\results"
+$env:FHIR_VALIDATOR_URL = "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **System Environment Variables (Persistent):**
@@ -195,7 +198,7 @@ dotnet src/Test.Fhir.R5.FhirPath.Validator/bin/Debug/net80/Test.Fhir.R5.FhirPath
 
 **With CLI Arguments:**
 ```bash
-dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --fhir-test-base-path "path/to/base/"
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --fhir-test-base-path "path/to/base/" --url "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **Help:**
