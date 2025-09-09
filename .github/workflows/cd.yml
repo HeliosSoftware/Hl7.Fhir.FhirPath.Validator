@@ -76,9 +76,21 @@ jobs:
             --runtime ${{ matrix.runtime }} \
             --self-contained true \
             --output ./publish/${{ matrix.runtime }}/fhirpath-validator \
-            -p:PublishSingleFile=true \
+            -p:PublishSingleFile=false \
             -p:IncludeNativeLibrariesForSelfExtract=true \
             -p:Version=${{ steps.version.outputs.VERSION }}
+
+      - name: Verify specification files are included
+        shell: bash
+        run: |
+          echo "Checking for specification files in publish output..."
+          ls -la ./publish/${{ matrix.runtime }}/fhirpath-validator/
+          if [ -f "./publish/${{ matrix.runtime }}/fhirpath-validator/specification.zip" ]; then
+            echo " specification.zip found in publish output"
+          else
+            echo " specification.zip NOT found - this will cause runtime errors"
+            exit 1
+          fi
 
       - name: Create distribution archive
         shell: bash
