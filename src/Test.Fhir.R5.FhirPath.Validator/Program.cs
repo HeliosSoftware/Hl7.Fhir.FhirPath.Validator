@@ -48,6 +48,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 Console.WriteLine($"  Test File: {TestConfiguration.FhirTestFile}");
                 Console.WriteLine($"  Base Path: {TestConfiguration.FhirTestBasePath}");
                 Console.WriteLine($"  Results Path: {TestConfiguration.FhirPathResultsPath}");
+                Console.WriteLine($"  Server URL: {TestConfiguration.ServerUrl}");
                 Console.WriteLine($"  Known Failures: {_knownFailures?.knownFailures?.Count ?? 0} defined");
                 Console.WriteLine();
                 
@@ -234,6 +235,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
             Console.WriteLine("  --fhir-test-file <path>        Path to the FHIR test cases XML file");
             Console.WriteLine("  --fhir-test-base-path <path>   Base path for FHIR test case files");
             Console.WriteLine("  --fhirpath-results-path <path> Path to store test result JSON files");
+            Console.WriteLine("  --url <url>                    FHIRPath evaluation server URL for remote evaluation (TestEvaluateOnServer)");
             Console.WriteLine("  --known-failures <path>         Path to known test failures JSON file (optional)");
             Console.WriteLine("  --help, -h                     Show this help message");
             Console.WriteLine();
@@ -241,6 +243,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
             Console.WriteLine("  FHIR_TEST_FILE                 Same as --fhir-test-file");
             Console.WriteLine("  FHIR_TEST_BASE_PATH            Same as --fhir-test-base-path");
             Console.WriteLine("  FHIRPATH_RESULTS_PATH          Same as --fhirpath-results-path");
+            Console.WriteLine("  FHIR_VALIDATOR_URL             Same as --url");
             Console.WriteLine("  KNOWN_TEST_FAILURES_FILE       Same as --known-failures");
             Console.WriteLine();
             Console.WriteLine("Exit Codes:");
