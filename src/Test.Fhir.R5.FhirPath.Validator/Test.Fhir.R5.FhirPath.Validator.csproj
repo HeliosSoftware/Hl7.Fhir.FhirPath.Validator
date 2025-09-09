@@ -27,20 +27,9 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.10.3" />
   </ItemGroup>
 
-  <!-- Ensure FHIR specification files are included in publish -->
-  <ItemGroup>
-    <Content
-      Include="$(NuGetPackageRoot)hl7.fhir.specification.data.r5\5.12.2\contentFiles\any\any\specification.zip"
-      Condition="Exists('$(NuGetPackageRoot)hl7.fhir.specification.data.r5\5.12.2\contentFiles\any\any\specification.zip')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
-    <ProjectReference
-      Include="..\Hl7.Fhir.R5.FhirPath.Validator\Hl7.Fhir.R5.FhirPath.Validator.csproj" />
+    <ProjectReference Include="..\Hl7.Fhir.R5.FhirPath.Validator\Hl7.Fhir.R5.FhirPath.Validator.csproj" />
   </ItemGroup>
 
 </Project>
