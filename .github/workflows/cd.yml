@@ -80,6 +80,20 @@ jobs:
             -p:IncludeNativeLibrariesForSelfExtract=true \
             -p:Version=${{ steps.version.outputs.VERSION }}
 
+      - name: Include FHIR specification.zip (if available)
+        shell: bash
+        run: |
+          set -e
+          PUBLISH_DIR=./publish/${{ matrix.runtime }}/fhirpath-validator
+          # Try to locate the spec zip from NuGet contentFiles
+          SPEC_ZIP=$(ls "$HOME/.nuget/packages/hl7.fhir.specification.data.r5"/*/contentFiles/**/specification.zip 2>/dev/null | head -n 1 || true)
+          if [ -n "$SPEC_ZIP" ] && [ -f "$SPEC_ZIP" ]; then
+            echo "Copying specification.zip from $SPEC_ZIP"
+            cp "$SPEC_ZIP" "$PUBLISH_DIR/specification.zip"
+          else
+            echo "specification.zip not found in NuGet cache; the executable will rely on runtime fallback (InMemoryResourceResolver)."
+          fi
+
       - name: Create distribution archive
         shell: bash
         run: |

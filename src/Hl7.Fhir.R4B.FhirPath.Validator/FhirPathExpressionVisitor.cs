@@ -16,18 +16,37 @@ namespace Hl7.Fhir.FhirPath.Validator
     public class FhirPathExpressionVisitor : ExtensionResolvingFhirPathExpressionVisitor
     {
         public FhirPathExpressionVisitor()
-            : base(new CachedResolver(
-				new MultiResolver(
-					ZipSource.CreateValidationSource()
-				)
-			), ModelInspector.ForAssembly(typeof(Patient).Assembly),
+            : base(CreateDefaultResolver(), ModelInspector.ForAssembly(typeof(Patient).Assembly),
                   Hl7.Fhir.Model.ModelInfo.SupportedResources,
                   Hl7.Fhir.Model.ModelInfo.OpenTypes)
         {
         }
 
-		public FhirPathExpressionVisitor(IResourceResolver source)
-			: base(source, ModelInspector.ForAssembly(typeof(Patient).Assembly),
+        private static IResourceResolver CreateDefaultResolver()
+        {
+            try
+            {
+                var disable = Environment.GetEnvironmentVariable("FHIR_DISABLE_SPEC_ZIP");
+                if (!string.IsNullOrEmpty(disable) && (disable == "1" || disable.Equals("true", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return new InMemoryResourceResolver();
+                }
+
+                return new CachedResolver(
+                    new MultiResolver(
+                        ZipSource.CreateValidationSource()
+                    )
+                );
+            }
+            catch
+            {
+                // Fallback when specification.zip is not available in the runtime environment
+                return new InMemoryResourceResolver();
+            }
+        }
+
+        public FhirPathExpressionVisitor(IResourceResolver source)
+            : base(source, ModelInspector.ForAssembly(typeof(Patient).Assembly),
                   Hl7.Fhir.Model.ModelInfo.SupportedResources,
                   Hl7.Fhir.Model.ModelInfo.OpenTypes)
         {
