@@ -9,6 +9,11 @@ using Test.Fhir.FhirPath.Validator;
 
 namespace Test.Fhir.R5.FhirPath.Validator
 {
+    public class NotImplementedTestException : Exception
+    {
+        public NotImplementedTestException(string message) : base(message) { }
+    }
+
     public class KnownFailure
     {
         public string groupName { get; set; }
@@ -91,62 +96,68 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             
                             if (IsKnownFailure(groupName, testName))
                             {
-                                Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
+                                Console.WriteLine("Result: true (Category: KNOWN_FAILURE_RESOLVED)");
                                 knownFailuresFixed++;
                                 knownFailuresFixedTests.Add($"{groupName}.{testName}");
                             }
                             else
                             {
-                                Console.WriteLine("PASSED");
+                                Console.WriteLine("Result: true");
                                 passed++;
                             }
                         }
                         catch (AssertInconclusiveException ex)
                         {
-                            Console.WriteLine($"SKIPPED - {ex.Message}");
+                            Console.WriteLine($"Result: false (Category: SKIPPED) - {ex.Message}");
                             skipped++;
                         }
                         catch (AssertFailedException ex)
                         {
                             if (IsKnownFailure(groupName, testName))
                             {
-                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                Console.WriteLine($"Result: false (Category: KNOWN_FAILURE) - {ex.Message}");
                                 knownFailures++;
                             }
                             else
                             {
                                 if (IsNotImplementedFailure(ex.Message))
                                 {
-                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: NOT_IMPLEMENTED) - {ex.Message}");
                                     notImplemented++;
                                     notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"FAILED - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: FAILED) - {ex.Message}");
                                     failed++;
                                     failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
                             }
                         }
+                        catch (NotImplementedTestException ex)
+                        {
+                            Console.WriteLine($"Result: false (Category: NOT_IMPLEMENTED) - {ex.Message}");
+                            notImplemented++;
+                            notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                        }
                         catch (Exception ex)
                         {
                             if (IsKnownFailure(groupName, testName))
                             {
-                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                Console.WriteLine($"Result: false (Category: KNOWN_FAILURE) - {ex.Message}");
                                 knownFailures++;
                             }
                             else
                             {
                                 if (IsNotImplementedFailure(ex.Message))
                                 {
-                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: NOT_IMPLEMENTED) - {ex.Message}");
                                     notImplemented++;
                                     notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"ERROR - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: ERROR) - {ex.Message}");
                                     failed++;
                                     failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
@@ -173,39 +184,39 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             
                             if (IsKnownFailure(groupName, testName))
                             {
-                                Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
+                                Console.WriteLine("Result: true (Category: KNOWN_FAILURE_RESOLVED)");
                                 knownFailuresFixed++;
                                 knownFailuresFixedTests.Add($"{groupName}.{testName}");
                             }
                             else
                             {
-                                Console.WriteLine("PASSED");
+                                Console.WriteLine("Result: true");
                                 passed++;
                             }
                         }
                         catch (AssertInconclusiveException ex)
                         {
-                            Console.WriteLine($"SKIPPED - {ex.Message}");
+                            Console.WriteLine($"Result: false (Category: SKIPPED) - {ex.Message}");
                             skipped++;
                         }
                         catch (AssertFailedException ex)
                         {
                             if (IsKnownFailure(groupName, testName))
                             {
-                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                Console.WriteLine($"Result: false (Category: KNOWN_FAILURE) - {ex.Message}");
                                 knownFailures++;
                             }
                             else
                             {
                                 if (IsNotImplementedFailure(ex.Message))
                                 {
-                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: NOT_IMPLEMENTED) - {ex.Message}");
                                     notImplemented++;
                                     notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"FAILED - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: FAILED) - {ex.Message}");
                                     failed++;
                                     failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
@@ -215,20 +226,20 @@ namespace Test.Fhir.R5.FhirPath.Validator
                         {
                             if (IsKnownFailure(groupName, testName))
                             {
-                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                Console.WriteLine($"Result: false (Category: KNOWN_FAILURE) - {ex.Message}");
                                 knownFailures++;
                             }
                             else
                             {
                                 if (IsNotImplementedFailure(ex.Message))
                                 {
-                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: NOT_IMPLEMENTED) - {ex.Message}");
                                     notImplemented++;
                                     notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
                                 else
                                 {
-                                    Console.WriteLine($"ERROR - {ex.Message}");
+                                    Console.WriteLine($"Result: false (Category: ERROR) - {ex.Message}");
                                     failed++;
                                     failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                                 }
@@ -238,35 +249,46 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 }
                 
                 Console.WriteLine();
-                Console.WriteLine("Test Results:");
-                Console.WriteLine($"  Passed: {passed}");
-                Console.WriteLine($"  Known Failures: {knownFailures}");
-                Console.WriteLine($"  Known Failures Resolved: {knownFailuresFixed}");
+                Console.WriteLine("Test Results Summary:");
+                Console.WriteLine($"  Result: true  -> {passed} tests");
+                Console.WriteLine($"  Result: false -> {knownFailures + failed + notImplemented + skipped + knownFailuresFixed} tests");
+                Console.WriteLine($"    ├─ Category: KNOWN_FAILURE -> {knownFailures} tests");
+                Console.WriteLine($"    ├─ Category: FAILED -> {failed} tests");
+                Console.WriteLine($"    ├─ Category: NOT_IMPLEMENTED -> {notImplemented} tests");
+                Console.WriteLine($"    ├─ Category: SKIPPED -> {skipped} tests");
+                Console.WriteLine($"    └─ Category: KNOWN_FAILURE_RESOLVED -> {knownFailuresFixed} tests");
+                Console.WriteLine($"  Total: {testData.Count}");
+                Console.WriteLine();
+                
                 if (knownFailuresFixed > 0)
                 {
+                    Console.WriteLine("Known Failures Resolved (Result: true but were expected to fail):");
                     foreach (var test in knownFailuresFixedTests)
                     {
                         Console.WriteLine($"    - {test}");
                     }
+                    Console.WriteLine();
                 }
-                Console.WriteLine($"  Failed: {failed}");
+                
                 if (failed > 0)
                 {
+                    Console.WriteLine("Unexpected Failures (Result: false, Category: FAILED):");
                     foreach (var test in failedTests)
                     {
                         Console.WriteLine($"    - {test}");
                     }
+                    Console.WriteLine();
                 }
-                Console.WriteLine($"  Not Implemented: {notImplemented}");
+                
                 if (notImplemented > 0)
                 {
+                    Console.WriteLine("Not Implemented (Result: false, Category: NOT_IMPLEMENTED):");
                     foreach (var test in notImplementedTests)
                     {
                         Console.WriteLine($"    - {test}");
                     }
+                    Console.WriteLine();
                 }
-                Console.WriteLine($"  Skipped: {skipped}");
-                Console.WriteLine($"  Total: {testData.Count}");
                 
                 if (failed > 0 || knownFailuresFixed > 0)
                 {
