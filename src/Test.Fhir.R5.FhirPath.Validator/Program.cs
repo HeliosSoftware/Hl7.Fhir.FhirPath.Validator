@@ -65,6 +65,8 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 int skipped = 0;
                 int knownFailures = 0;
                 int knownFailuresFixed = 0;
+                var failedTests = new List<string>();
+                var knownFailuresFixedTests = new List<string>();
                 
                 if (runServer)
                 {
@@ -89,6 +91,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             {
                                 Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
                                 knownFailuresFixed++;
+                                knownFailuresFixedTests.Add($"{groupName}.{testName}");
                             }
                             else
                             {
@@ -112,6 +115,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             {
                                 Console.WriteLine($"FAILED - {ex.Message}");
                                 failed++;
+                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                             }
                         }
                         catch (Exception ex)
@@ -125,6 +129,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             {
                                 Console.WriteLine($"ERROR - {ex.Message}");
                                 failed++;
+                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                             }
                         }
                     }
@@ -150,6 +155,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             {
                                 Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
                                 knownFailuresFixed++;
+                                knownFailuresFixedTests.Add($"{groupName}.{testName}");
                             }
                             else
                             {
@@ -173,6 +179,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             {
                                 Console.WriteLine($"FAILED - {ex.Message}");
                                 failed++;
+                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                             }
                         }
                         catch (Exception ex)
@@ -186,6 +193,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             {
                                 Console.WriteLine($"ERROR - {ex.Message}");
                                 failed++;
+                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
                             }
                         }
                     }
@@ -194,9 +202,23 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 Console.WriteLine();
                 Console.WriteLine("Test Results:");
                 Console.WriteLine($"  Passed: {passed}");
-                Console.WriteLine($"  Failed: {failed}");
                 Console.WriteLine($"  Known Failures: {knownFailures}");
                 Console.WriteLine($"  Known Failures Resolved: {knownFailuresFixed}");
+                if (knownFailuresFixed > 0)
+                {
+                    foreach (var test in knownFailuresFixedTests)
+                    {
+                        Console.WriteLine($"    - {test}");
+                    }
+                }
+                Console.WriteLine($"  Failed: {failed}");
+                if (failed > 0)
+                {
+                    foreach (var test in failedTests)
+                    {
+                        Console.WriteLine($"    - {test}");
+                    }
+                }
                 Console.WriteLine($"  Skipped: {skipped}");
                 Console.WriteLine($"  Total: {testData.Count}");
                 
