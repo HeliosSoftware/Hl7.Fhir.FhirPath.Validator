@@ -101,8 +101,8 @@ src/
 ├── Hl7.Fhir.R4.FhirPath.Validator/            # R4-specific implementation
 ├── Hl7.Fhir.R4B.FhirPath.Validator/           # R4B-specific implementation
 ├── Hl7.Fhir.R5.FhirPath.Validator/            # R5-specific implementation
-├── Test.Fhir.R5.FhirPath.Validator/           # R5 unit tests
-├── Test.FhirPath.Validator/                   # General unit tests
+├── Test.Fhir.R5.FhirPath.Validator/           # R5 console app and unit tests
+├── Test.Fhir.R4B.FhirPath.Validator/           # R4B unit tests
 └── Hl7.FhirPath.Validator.sln                 # Solution file
 ```
 
@@ -122,6 +122,7 @@ The project uses these major NuGet packages:
 The R5 unit tests can be configured using CLI arguments, environment variables, or will fall back to default values. The priority order is: **CLI Arguments** → **Environment Variables** → **Default Values**.
 
 > **Note:** The default values assume that the [fhir-test-cases](https://github.com/FHIR/fhir-test-cases) repository is cloned at the same level as this project:
+>
 > ```
 > parent-directory/
 > ├── Hl7.Fhir.FhirPath.Validator/    (this project)
@@ -132,21 +133,28 @@ The R5 unit tests can be configured using CLI arguments, environment variables, 
 >         └── examples/
 > ```
 
-| CLI Argument              | Environment Variable    | Description                          | Default Value                                      |
-| ------------------------- | ----------------------- | ------------------------------------ | -------------------------------------------------- |
-| `--fhir-test-file`        | `FHIR_TEST_FILE`        | Path to the FHIR test cases XML file | `../fhir-test-cases/r5/fhirpath/tests-fhir-r5.xml` |
-| `--fhir-test-base-path`   | `FHIR_TEST_BASE_PATH`   | Base path for FHIR test case files   | `../fhir-test-cases/r5/`                           |
-| `--fhirpath-results-path` | `FHIRPATH_RESULTS_PATH` | Path to store test result JSON files | `./static/results`                                 |
-| `--url`                   | `FHIR_VALIDATOR_URL`    | FHIRPath evaluation server URL       | `https://fhirpath.heliossoftware.com/r5`           |
+### Command Line Options
+
+The test runner supports several command line options:
+
+- `--fhir-test-file <path>` - Path to the FHIR test cases XML file
+- `--fhir-test-base-path <path>` - Base path for FHIR test case files  
+- `--fhirpath-results-path <path>` - Path to store test result JSON files
+- `--url <url>` - FHIRPath evaluation server URL for remote evaluation
+- `--server` - Run server-evaluation tests and write JSON results to FHIRPATH_RESULTS_PATH
+- `--known-failures <path>` - Path to known test failures JSON file (optional)
+- `--help, -h` - Show help message
 
 ### Using CLI Arguments (Highest Priority)
 
 **Running tests with custom paths:**
+
 ```bash
 dotnet test src/Hl7.FhirPath.Validator.sln -- --fhir-test-file "c:\your\custom\path\tests-fhir-r5.xml" --fhir-test-base-path "c:\your\custom\path\r5\" --fhirpath-results-path "c:\your\custom\path\results" --url "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **Running specific test project with CLI args:**
+
 ```bash
 dotnet test src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "c:\custom\tests.xml"
 ```
@@ -156,6 +164,7 @@ dotnet test src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.
 **Setting Environment Variables:**
 
 **Windows Command Prompt:**
+
 ```cmd
 set FHIR_TEST_FILE=c:\your\custom\path\tests-fhir-r5.xml
 set FHIR_TEST_BASE_PATH=c:\your\custom\path\r5\
@@ -164,6 +173,7 @@ set FHIR_VALIDATOR_URL=https://fhirpath.heliossoftware.com/r5
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 $env:FHIR_TEST_FILE = "c:\your\custom\path\tests-fhir-r5.xml"
 $env:FHIR_TEST_BASE_PATH = "c:\your\custom\path\r5\"
@@ -172,6 +182,7 @@ $env:FHIR_VALIDATOR_URL = "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **System Environment Variables (Persistent):**
+
 1. Open System Properties → Advanced → Environment Variables
 2. Add new variables under "User variables" or "System variables"
 3. Restart your IDE/command prompt to pick up the changes
@@ -183,25 +194,30 @@ $env:FHIR_VALIDATOR_URL = "https://fhirpath.heliossoftware.com/r5"
 The test project can be run as a console application that returns proper exit codes for build pipelines:
 
 ```bash
-# Build and run the console application
+# Build and run the console application (local evaluation)
 dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
 
-# Or build first, then run the executable
-dotnet build src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
-dotnet src/Test.Fhir.R5.FhirPath.Validator/bin/Debug/net80/Test.Fhir.R5.FhirPath.Validator.dll
+# Run with server evaluation (writes JSON results)
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --server
+
+# With custom configuration
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --url "https://fhirpath.heliossoftware.com/r5" --server
 ```
 
 **Exit Codes:**
+
 - `0` - All tests passed (success)
 - `1` - One or more tests failed
 - `2` - Fatal error occurred
 
 **With CLI Arguments:**
+
 ```bash
 dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --fhir-test-base-path "path/to/base/" --url "https://fhirpath.heliossoftware.com/r5"
 ```
 
 **Help:**
+
 ```bash
 dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --help
 ```
@@ -317,56 +333,56 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Checkout fhir-test-cases
-      uses: actions/checkout@v4
-      with:
-        repository: FHIR/fhir-test-cases
-        path: fhir-test-cases
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-    
-    - name: Restore dependencies
-      run: dotnet restore src/Hl7.FhirPath.Validator.sln
-    
-    - name: Build
-      run: dotnet build src/Hl7.FhirPath.Validator.sln --no-restore
-    
-    - name: Run FhirPath Validation Tests
-      run: dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --no-build
+      - uses: actions/checkout@v4
+
+      - name: Checkout fhir-test-cases
+        uses: actions/checkout@v4
+        with:
+          repository: FHIR/fhir-test-cases
+          path: fhir-test-cases
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore src/Hl7.FhirPath.Validator.sln
+
+      - name: Build
+        run: dotnet build src/Hl7.FhirPath.Validator.sln --no-restore
+
+      - name: Run FhirPath Validation Tests
+        run: dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --no-build
 ```
 
 ### Azure DevOps Pipeline Example
 
 ```yaml
 trigger:
-- main
+  - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 
 steps:
-- task: UseDotNet@2
-  inputs:
-    version: '8.0.x'
+  - task: UseDotNet@2
+    inputs:
+      version: "8.0.x"
 
-- checkout: self
-- checkout: git://FHIR/fhir-test-cases@main
+  - checkout: self
+  - checkout: git://FHIR/fhir-test-cases@main
 
-- script: dotnet restore src/Hl7.FhirPath.Validator.sln
-  displayName: 'Restore packages'
+  - script: dotnet restore src/Hl7.FhirPath.Validator.sln
+    displayName: "Restore packages"
 
-- script: dotnet build src/Hl7.FhirPath.Validator.sln --no-restore
-  displayName: 'Build solution'
+  - script: dotnet build src/Hl7.FhirPath.Validator.sln --no-restore
+    displayName: "Build solution"
 
-- script: dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --no-build
-  displayName: 'Run FhirPath validation tests'
+  - script: dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj --no-build
+    displayName: "Run FhirPath validation tests"
 ```
 
 ## Next Steps

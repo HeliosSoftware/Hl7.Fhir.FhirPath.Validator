@@ -52,11 +52,14 @@ The best place to start is to look at the unit tests and the console application
 The project includes a console application that can run all tests and return proper exit codes for CI/CD pipelines:
 
 ```bash
-# Build and run the console application
+# Build and run the console application (local evaluation)
 dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj
 
+# Run with server evaluation (writes JSON results)
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --server
+
 # With custom configuration
-dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --url "https://fhirpath.heliossoftware.com/r5"
+dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- --fhir-test-file "path/to/tests.xml" --url "https://fhirpath.heliossoftware.com/r5" --server
 ```
 
 **Exit Codes:**
@@ -75,13 +78,43 @@ Example `known-test-failures.json`:
 
 ```json
 {
-  "description": "Known test failures that should be ignored when determining overall test success",
-  "version": "1.0",
+  "description": "Known test failures for FHIR R5 FhirPath Validator",
+  "version": "1.0.0",
   "knownFailures": [
     {
-      "groupName": "PrecisionDecimal",
+      "groupName": "TerminologyTests",
+      "testName": "txTest02",
+      "reason": "ConceptMap cm-address-use-v2 not available on test server"
+    },
+    {
+      "groupName": "Precision",
+      "testName": "PrecisionDecimal",
+      "reason": "Decimal trailing zeros not preserved (known limitation)"
+    },
+    {
+      "groupName": "testConformsTo",
       "testName": "*",
-      "reason": "Precision decimal handling not fully implemented"
+      "reason": "conformsTo not yet implemented"
+    },
+    {
+      "groupName": "miscEngineTests",
+      "testName": "testContainedId",
+      "reason": "Multiple matches error - collection handling issue in resolve function"
+    },
+    {
+      "groupName": "polymorphics",
+      "testName": "testPolymorphicsB",
+      "reason": "Test data issue?"
+    },
+    {
+      "groupName": "testDollar",
+      "testName": "testDollarOrderNotAllowed",
+      "reason": "Test data issue?"
+    },
+    {
+      "groupName": "testIif",
+      "testName": "testIif6",
+      "reason": "Still working on this one - needs spec definition"
     }
   ]
 }
@@ -93,9 +126,12 @@ CLI usage (typical external project scenario):
 # Using the published executable with external known failures file
 Test.Fhir.R5.FhirPath.Validator.exe --known-failures "known-test-failures.json"
 
+# Run with server evaluation and known failures
+Test.Fhir.R5.FhirPath.Validator.exe --server --known-failures "known-test-failures.json"
+
 # Or during development with dotnet run
 dotnet run --project src/Test.Fhir.R5.FhirPath.Validator/Test.Fhir.R5.FhirPath.Validator.csproj -- \
-  --known-failures "path/to/your/known-test-failures.json"
+  --known-failures "path/to/your/known-test-failures.json" --server
 ```
 
 Fallback search locations (when `--known-failures`/`KNOWN_TEST_FAILURES_FILE` is not specified):
