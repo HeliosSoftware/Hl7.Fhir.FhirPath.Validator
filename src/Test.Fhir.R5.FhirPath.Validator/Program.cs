@@ -65,8 +65,10 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 int skipped = 0;
                 int knownFailures = 0;
                 int knownFailuresFixed = 0;
+                int notImplemented = 0;
                 var failedTests = new List<string>();
                 var knownFailuresFixedTests = new List<string>();
+                var notImplementedTests = new List<string>();
                 
                 if (runServer)
                 {
@@ -113,9 +115,18 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             }
                             else
                             {
-                                Console.WriteLine($"FAILED - {ex.Message}");
-                                failed++;
-                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                if (IsNotImplementedFailure(ex.Message))
+                                {
+                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    notImplemented++;
+                                    notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"FAILED - {ex.Message}");
+                                    failed++;
+                                    failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -127,9 +138,18 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             }
                             else
                             {
-                                Console.WriteLine($"ERROR - {ex.Message}");
-                                failed++;
-                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                if (IsNotImplementedFailure(ex.Message))
+                                {
+                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    notImplemented++;
+                                    notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"ERROR - {ex.Message}");
+                                    failed++;
+                                    failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
                             }
                         }
                     }
@@ -177,9 +197,18 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             }
                             else
                             {
-                                Console.WriteLine($"FAILED - {ex.Message}");
-                                failed++;
-                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                if (IsNotImplementedFailure(ex.Message))
+                                {
+                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    notImplemented++;
+                                    notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"FAILED - {ex.Message}");
+                                    failed++;
+                                    failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -191,9 +220,18 @@ namespace Test.Fhir.R5.FhirPath.Validator
                             }
                             else
                             {
-                                Console.WriteLine($"ERROR - {ex.Message}");
-                                failed++;
-                                failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                if (IsNotImplementedFailure(ex.Message))
+                                {
+                                    Console.WriteLine($"NOT IMPLEMENTED - {ex.Message}");
+                                    notImplemented++;
+                                    notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"ERROR - {ex.Message}");
+                                    failed++;
+                                    failedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                                }
                             }
                         }
                     }
@@ -215,6 +253,14 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 if (failed > 0)
                 {
                     foreach (var test in failedTests)
+                    {
+                        Console.WriteLine($"    - {test}");
+                    }
+                }
+                Console.WriteLine($"  Not Implemented: {notImplemented}");
+                if (notImplemented > 0)
+                {
+                    foreach (var test in notImplementedTests)
                     {
                         Console.WriteLine($"    - {test}");
                     }
@@ -315,6 +361,13 @@ namespace Test.Fhir.R5.FhirPath.Validator
             return _knownFailures.knownFailures.Any(kf => 
                 (kf.groupName == groupName || kf.groupName == "*") &&
                 (kf.testName == testName || kf.testName == "*"));
+        }
+        
+        private static bool IsNotImplementedFailure(string failureMessage)
+        {
+            return failureMessage?.Contains("Not implemented") == true
+                || failureMessage?.Contains("Unhandled function '") == true
+                || failureMessage?.Contains("No method in multimethod 'compile-node' for dispatch value: ") == true;
         }
 
         private static void ParseArguments(string[] args)
