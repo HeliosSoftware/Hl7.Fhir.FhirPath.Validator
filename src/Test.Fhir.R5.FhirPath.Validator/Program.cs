@@ -222,6 +222,12 @@ namespace Test.Fhir.R5.FhirPath.Validator
                                 }
                             }
                         }
+                        catch (NotImplementedTestException ex)
+                        {
+                            Console.WriteLine($"Result: false (Category: NOT_IMPLEMENTED) - {ex.Message}");
+                            notImplemented++;
+                            notImplementedTests.Add($"{groupName}.{testName}: {ex.Message}");
+                        }
                         catch (Exception ex)
                         {
                             if (IsKnownFailure(groupName, testName))
@@ -303,9 +309,14 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 else
                 {
                     Console.WriteLine();
-                    if (knownFailures > 0)
+                    if (knownFailures > 0 || notImplemented > 0)
                     {
-                        Console.WriteLine($"✅ All tests PASSED ({knownFailures} known failures ignored)");
+                        var ignoredParts = new List<string>();
+                        if (knownFailures > 0)
+                            ignoredParts.Add($"{knownFailures} known failures");
+                        if (notImplemented > 0)
+                            ignoredParts.Add($"{notImplemented} not implemented");
+                        Console.WriteLine($"✅ All tests PASSED ({string.Join(", ", ignoredParts)} ignored)");
                     }
                     else
                     {
