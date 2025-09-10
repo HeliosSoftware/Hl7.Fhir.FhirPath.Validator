@@ -44,12 +44,15 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 var testInstance = new Hl7UnitTestFileR5();
                 testInstance.Init();
                 
+                bool runServer = args.Contains("--server");
+                
                 Console.WriteLine($"Configuration:");
                 Console.WriteLine($"  Test File: {TestConfiguration.FhirTestFile}");
                 Console.WriteLine($"  Base Path: {TestConfiguration.FhirTestBasePath}");
                 Console.WriteLine($"  Results Path: {TestConfiguration.FhirPathResultsPath}");
                 Console.WriteLine($"  Server URL: {TestConfiguration.ServerUrl}");
                 Console.WriteLine($"  Known Failures: {_knownFailures?.knownFailures?.Count ?? 0} defined");
+                Console.WriteLine($"  Mode: {(runServer ? "Server evaluation (JSON will be written)" : "Local evaluation")}");
                 Console.WriteLine();
                 
                 // Get all test data
@@ -63,61 +66,127 @@ namespace Test.Fhir.R5.FhirPath.Validator
                 int knownFailures = 0;
                 int knownFailuresFixed = 0;
                 
-                foreach (var test in testData)
+                if (runServer)
                 {
-                    string groupName = (string)test[0];
-                    string testName = (string)test[1];
-                    
-                    Console.Write($"Running {groupName}.{testName}... ");
-                    
-                    try
+                    // Ensure the results directory exists so JSON can be written
+                    System.IO.Directory.CreateDirectory(TestConfiguration.FhirPathResultsPath);
+                    // Use the first configured server (currently Helios Software (R5))
+                    var engineName = Hl7UnitTestFileR5.servers.First().EngineName;
+
+                    foreach (var test in testData)
                     {
-                        // Run CheckStaticReturnTypes test
-                        testInstance.CheckStaticReturnTypes(groupName, testName);
+                        string groupName = (string)test[0];
+                        string testName = (string)test[1];
                         
-                        // Run TestEvaluateExpression test
-                        testInstance.TestEvaluateExpression(groupName, testName);
+                        Console.Write($"Running {groupName}.{testName} (server)... ");
                         
-                        if (IsKnownFailure(groupName, testName))
+                        try
                         {
-                            Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
-                            knownFailuresFixed++;
+                            // Execute server-based evaluation (this method records JSON via RecordResult)
+                            testInstance.TestEvaluateOnServer(engineName, groupName, testName);
+                            
+                            if (IsKnownFailure(groupName, testName))
+                            {
+                                Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
+                                knownFailuresFixed++;
+                            }
+                            else
+                            {
+                                Console.WriteLine("PASSED");
+                                passed++;
+                            }
                         }
-                        else
+                        catch (AssertInconclusiveException ex)
                         {
-                            Console.WriteLine("PASSED");
-                            passed++;
+                            Console.WriteLine($"SKIPPED - {ex.Message}");
+                            skipped++;
+                        }
+                        catch (AssertFailedException ex)
+                        {
+                            if (IsKnownFailure(groupName, testName))
+                            {
+                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                knownFailures++;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"FAILED - {ex.Message}");
+                                failed++;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (IsKnownFailure(groupName, testName))
+                            {
+                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                knownFailures++;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"ERROR - {ex.Message}");
+                                failed++;
+                            }
                         }
                     }
-                    catch (AssertInconclusiveException ex)
+                }
+                else
+                {
+                    foreach (var test in testData)
                     {
-                        Console.WriteLine($"SKIPPED - {ex.Message}");
-                        skipped++;
-                    }
-                    catch (AssertFailedException ex)
-                    {
-                        if (IsKnownFailure(groupName, testName))
+                        string groupName = (string)test[0];
+                        string testName = (string)test[1];
+                        
+                        Console.Write($"Running {groupName}.{testName}... ");
+                        
+                        try
                         {
-                            Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
-                            knownFailures++;
+                            // Run CheckStaticReturnTypes test
+                            testInstance.CheckStaticReturnTypes(groupName, testName);
+                            
+                            // Run TestEvaluateExpression test
+                            testInstance.TestEvaluateExpression(groupName, testName);
+                            
+                            if (IsKnownFailure(groupName, testName))
+                            {
+                                Console.WriteLine("PASSED (EXPECTED TO FAIL) - known failure resolved");
+                                knownFailuresFixed++;
+                            }
+                            else
+                            {
+                                Console.WriteLine("PASSED");
+                                passed++;
+                            }
                         }
-                        else
+                        catch (AssertInconclusiveException ex)
                         {
-                            Console.WriteLine($"FAILED - {ex.Message}");
-                            failed++;
+                            Console.WriteLine($"SKIPPED - {ex.Message}");
+                            skipped++;
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (IsKnownFailure(groupName, testName))
+                        catch (AssertFailedException ex)
                         {
-                            Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
-                            knownFailures++;
+                            if (IsKnownFailure(groupName, testName))
+                            {
+                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                knownFailures++;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"FAILED - {ex.Message}");
+                                failed++;
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            Console.WriteLine($"ERROR - {ex.Message}");
-                            failed++;
+                            if (IsKnownFailure(groupName, testName))
+                            {
+                                Console.WriteLine($"KNOWN FAILURE - {ex.Message}");
+                                knownFailures++;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"ERROR - {ex.Message}");
+                                failed++;
+                            }
                         }
                     }
                 }
@@ -249,6 +318,7 @@ namespace Test.Fhir.R5.FhirPath.Validator
             Console.WriteLine("  --fhir-test-base-path <path>   Base path for FHIR test case files");
             Console.WriteLine("  --fhirpath-results-path <path> Path to store test result JSON files");
             Console.WriteLine("  --url <url>                    FHIRPath evaluation server URL for remote evaluation (TestEvaluateOnServer)");
+            Console.WriteLine("  --server                       Run server-evaluation tests and write JSON results to FHIRPATH_RESULTS_PATH");
             Console.WriteLine("  --known-failures <path>         Path to known test failures JSON file (optional)");
             Console.WriteLine("  --help, -h                     Show this help message");
             Console.WriteLine();

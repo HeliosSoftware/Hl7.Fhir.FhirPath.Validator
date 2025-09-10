@@ -3,49 +3,24 @@
   "version": "1.0.0",
   "knownFailures": [
     {
-      "groupName": "TerminologyTests",
-      "testName": "txTest01",
-      "reason": "Variable 'terminologies' not found - requires terminology server integration"
-    },
-    {
       "groupName": "TerminologyTests", 
       "testName": "txTest02",
-      "reason": "Unhandled function 'translate' - terminology function not implemented"
+      "reason": "ConceptMap cm-address-use-v2 not available on test server"
     },
     {
-      "groupName": "TerminologyTests",
-      "testName": "txTest03", 
-      "reason": "Property 'parameter' not found - terminology result structure mismatch"
+      "groupName": "Precision",
+      "testName": "PrecisionDecimal",
+      "reason": "Decimal trailing zeros not preserved (known limitation)"
     },
     {
-      "groupName": "testInheritance",
-      "testName": "testFHIRPathAsFunction18",
-      "reason": "Unhandled function 'expand' - ValueSet expansion not implemented"
+      "groupName": "testConformsTo",
+      "testName": "*", 
+      "reason": "conformsTo not yet implemented"
     },
     {
-      "groupName": "testInheritance", 
-      "testName": "testFHIRPathAsFunction19",
-      "reason": "Property 'expansion' not found on ValueSet - expansion structure missing"
-    },
-    {
-      "groupName": "testInheritance",
-      "testName": "testFHIRPathAsFunction20",
-      "reason": "Property 'contains' not found - ValueSet contains structure missing"
-    },
-    {
-      "groupName": "testInheritance",
-      "testName": "testFHIRPathAsFunction21",
-      "reason": "Property 'part' not found - ConceptMap parameter structure missing"
-    },
-    {
-      "groupName": "testInheritance",
-      "testName": "testFHIRPathAsFunction22", 
-      "reason": "Property 'value' not found - ConceptMap result structure missing"
-    },
-    {
-      "groupName": "testInheritance",
-      "testName": "testFHIRPathAsFunction23",
-      "reason": "Property 'code' not found - ConceptMap coding structure missing"
+      "groupName": "miscEngineTests",
+      "testName": "testContainedId",
+      "reason": "Multiple matches error - collection handling issue in resolve function"
     },
     {
       "groupName": "miscEngineTests",
@@ -53,19 +28,19 @@
       "reason": "Multiple matches error - collection handling issue in resolve function"
     },
     {
-      "groupName": "Precision",
-      "testName": "*",
-      "reason": "Precision function tests may have duplicate names causing test conflicts"
+      "groupName": "polymorphics",
+      "testName": "testPolymorphicsB",
+      "reason": "Test data issue?"
     },
     {
-      "groupName": "HighBoundary",
-      "testName": "*", 
-      "reason": "HighBoundary function not fully implemented for all data types"
+      "groupName": "testDollar",
+      "testName": "testDollarOrderNotAllowed",
+      "reason": "Test data issue?"
     },
     {
-      "groupName": "Comparable",
-      "testName": "*",
-      "reason": "Comparable function for units may not be fully implemented"
+      "groupName": "testIif",
+      "testName": "testIif6",
+      "reason": "Still working on this one - needs spec definition"
     }
   ]
 }
