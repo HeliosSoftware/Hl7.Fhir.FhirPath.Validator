@@ -615,7 +615,7 @@ namespace Test.Fhir.FhirPath.Validator
 					if (rawResult.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
 						Assert.Inconclusive($"Service Unavailable");
 					if (rawResult.StatusCode == System.Net.HttpStatusCode.NotImplemented)
-						throw new NotImplementedTestException($"Server returned 501 Not Implemented");
+						Assert.Inconclusive($"Server returned 501 Not Implemented");
 					var resultJson = rawResult.Content.ReadAsStringAsync().WaitResult();
 					result = new CustomSerializer().DeserializeFromJson(resultJson);
 					// result = new FhirJsonPocoDeserializer().DeserializeResource(resultJson);
