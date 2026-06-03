@@ -20,23 +20,27 @@ namespace Hl7.Fhir.FhirPath.Validator
 			_mi = mi;
 			_supportedResources = SupportedResources;
 			_openTypes = OpenTypes;
-			Add(new FunctionDefinition("lowBoundary").AddContexts(mi, "date-date,instant-instant,decimal-decimal,integer-integer,dateTime-dateTime,time-time,Quantity-Quantity"));
-			Add(new FunctionDefinition("highBoundary").AddContexts(mi, "date-date,instant-instant,decimal-decimal,integer-integer,dateTime-dateTime,time-time,Quantity-Quantity"));
+			Add(new FunctionDefinition("lowBoundary").AddContexts(mi, "date-date,instant-instant,decimal-decimal,integer-decimal,dateTime-dateTime,time-time,Quantity-Quantity"));
+			Add(new FunctionDefinition("highBoundary").AddContexts(mi, "date-date,instant-instant,decimal-decimal,integer-decimal,dateTime-dateTime,time-time,Quantity-Quantity"));
 
-            Add(new FunctionDefinition("precision").AddContexts(mi, "decimal-integer,date-integer,dateTime-integer,Time-integer")).Validations.Add(ValidateNoArguments);
+            // Date/Time component extraction functions (STU)
+            Add(new FunctionDefinition("precision").AddContexts(mi, "decimal-integer,date-integer,dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("yearOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("monthOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("dayOf").AddContexts(mi, "date-integer,dateTime-integer")).Validations.Add(ValidateNoArguments);
-            Add(new FunctionDefinition("hourOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
-            Add(new FunctionDefinition("minuteOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
-            Add(new FunctionDefinition("secondOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
-            Add(new FunctionDefinition("millisecondOf").AddContexts(mi, "dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("hourOf").AddContexts(mi, "date-integer,dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("minuteOf").AddContexts(mi, "date-integer,dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("secondOf").AddContexts(mi, "date-integer,dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("millisecondOf").AddContexts(mi, "date-integer,dateTime-integer,time-integer")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("timezoneOffsetOf").AddContexts(mi, "dateTime-decimal")).Validations.Add(ValidateNoArguments);
-            Add(new FunctionDefinition("dateOf").AddContexts(mi, "dateTime-date")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("dateOf").AddContexts(mi, "date-date,dateTime-date")).Validations.Add(ValidateNoArguments);
             Add(new FunctionDefinition("timeOf").AddContexts(mi, "dateTime-time")).Validations.Add(ValidateNoArguments);
 
             Add(new FunctionDefinition("length").AddContexts(mi, "string-integer")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("lower").AddContexts(mi, "string-string")).Validations.Add(ValidateNoArguments);
+            Add(new FunctionDefinition("upper").AddContexts(mi, "string-string")).Validations.Add(ValidateNoArguments);
 			Add(new FunctionDefinition("indexOf").AddContexts(mi, "string-integer")).Validations.Add(ValidateRequiredStringFirstArgument);
+            Add(new FunctionDefinition("lastIndexOf").AddContexts(mi, "string-integer")).Validations.Add(ValidateRequiredStringFirstArgument);
 
 			Add(new FunctionDefinition("toBoolean").AddContexts(mi, "boolean-boolean,integer-boolean,decimal-boolean,string-boolean")).Validations.Add(ValidateNoArguments);
 			Add(new FunctionDefinition("toInteger").AddContexts(mi, "integer-integer,string-integer,boolean-integer")).Validations.Add(ValidateNoArguments);
@@ -58,21 +62,21 @@ namespace Hl7.Fhir.FhirPath.Validator
 			Add(new FunctionDefinition("iif", false, true) { GetReturnType = IifReturnsType, SupportsContext = IifSupportsContext }).Validations.Add(ValidateRequiredBooleanFirstArgument);
 
 			// Add(new FunctionDefinition("allTrue", true, false) { GetReturnType = ReturnsBoolean }).Validations.Add(ValidateNoArguments);
-			Add(new FunctionDefinition("unary.-", false, true).AddContexts(mi, "integer-integer,decimal-decimal"));
-			Add(new FunctionDefinition("unary.+", false, true).AddContexts(mi, "integer-integer,decimal-decimal"));
+			Add(new FunctionDefinition("unary.-", false, true).AddContexts(mi, "integer-integer,decimal-decimal,Quantity-Quantity"));
+			Add(new FunctionDefinition("unary.+", false, true).AddContexts(mi, "integer-integer,decimal-decimal,Quantity-Quantity"));
 			Add(new FunctionDefinition("descendants", true, false) { GetReturnType = ReturnsFromDescendants, SupportsContext = (props) => true }).Validations.Add(ValidateNoArguments);
 
 			// Math functions
 			Add(new FunctionDefinition("abs").AddContexts(mi, "integer-integer,decimal-decimal,Quantity-Quantity")).Validations.Add(ValidateNoArguments);
-			Add(new FunctionDefinition("ceiling").AddContexts(mi, "integer-integer,decimal-integer")).Validations.Add(ValidateNoArguments);
+			Add(new FunctionDefinition("ceiling").AddContexts(mi, "integer-integer,decimal-integer,Quantity-integer")).Validations.Add(ValidateNoArguments);
 			Add(new FunctionDefinition("exp").AddContexts(mi, "integer-decimal,decimal-decimal")).Validations.Add(ValidateNoArguments);
-			Add(new FunctionDefinition("floor").AddContexts(mi, "integer-integer,decimal-integer")).Validations.Add(ValidateNoArguments);
+			Add(new FunctionDefinition("floor").AddContexts(mi, "integer-integer,decimal-integer,Quantity-Quantity")).Validations.Add(ValidateNoArguments);
 			Add(new FunctionDefinition("ln").AddContexts(mi, "integer-decimal,decimal-decimal")).Validations.Add(ValidateNoArguments);
 			Add(new FunctionDefinition("log").AddContexts(mi, "integer-decimal,decimal-decimal")); // requires a "base":decimal argument
 			Add(new FunctionDefinition("power").AddContexts(mi, "integer-integer,decimal-decimal")); // requires an exponent:integer|decimal argument
-			Add(new FunctionDefinition("round").AddContexts(mi, "decimal-decimal,integer-decimal")); // requires a precision:integer argument
+			Add(new FunctionDefinition("round").AddContexts(mi, "decimal-decimal,integer-decimal,Quantity-Quantity")); // requires a precision:integer argument
 			Add(new FunctionDefinition("sqrt").AddContexts(mi, "integer-decimal,decimal-decimal")).Validations.Add(ValidateNoArguments);
-			Add(new FunctionDefinition("truncate").AddContexts(mi, "integer-integer,decimal-integer")).Validations.Add(ValidateNoArguments);
+			Add(new FunctionDefinition("truncate").AddContexts(mi, "integer-integer,decimal-integer,Quantity-Quantity")).Validations.Add(ValidateNoArguments);
 
 			// SDC additional functions
 			Add(new FunctionDefinition("answers", true, true) { GetReturnType = ReturnsAnswers, SupportsContext = AnswersSupportsContext }).AddValidation(ValidateNoArguments);
