@@ -118,14 +118,15 @@ namespace Test.Fhir.FhirPath.Validator
             get
             {
                 var knownBadInvariants = new[] {
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus us-core-3",
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab us-core-4",
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-clinical-result us-core-3",
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole us-core-13",
-                    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole pd-1",
+                    "",
+                    // "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus us-core-3",
+                    // "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-lab us-core-4",
+                    // "http://hl7.org/fhir/us/core/StructureDefinition/us-core-observation-clinical-result us-core-3",
+                    // "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole us-core-13",
+                    // "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitionerrole pd-1",
                 };
 
-                return InvariantsInIG("hl7.fhir.us.core", "6.1.0", knownBadInvariants);
+                return InvariantsInIG("hl7.fhir.us.core", "7.0.0", knownBadInvariants);
             }
         }
 
@@ -268,7 +269,7 @@ namespace Test.Fhir.FhirPath.Validator
             get
             {
                 var knownBadInvariants = new[] {
-                    "http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-patient ch-pat-3",
+                    // "http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-patient ch-pat-3", // only a warning now
 					"http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-ahvn13-identifier ahvn13-length",
 					"http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-gln-identifier gln-startswith7601",
 					"http://fhir.ch/ig/ch-core/StructureDefinition/ch-core-epr-spid-identifier epr-spid-startswith76133761",
@@ -330,7 +331,7 @@ namespace Test.Fhir.FhirPath.Validator
                     "http://hl7.org/fhir/us/core/StructureDefinition/us-core-smokingstatus us-core-3",
                 };
 
-                return InvariantsInIG("hl7.fhir.us.sdoh-clinicalcare", "dev", knownBadInvariants);
+                return InvariantsInIG("hl7.fhir.us.sdoh-clinicalcare", "2.3.0", knownBadInvariants);
             }
         }
 
