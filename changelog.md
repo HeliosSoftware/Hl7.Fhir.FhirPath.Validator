@@ -3,6 +3,17 @@
 
 ## Change log ##
 
+### June 3 2026
+* Update FirelySDK dependency to 5.13.4
+
+* Fix a handful of function signatures based on the STU3 version of fhirpath
+
+### February 11 2026
+* Update FirelySDK dependency to 5.13.2
+
+* Add validation that checks quantity addition to datetime above seconds precision has no fractional component (when a constain is used, 
+  and only calendar units are used)
+
 ### 28 August 2025:
 * Update FirelySDK dependency to 5.12.2
 * Include support for $index return type checking
