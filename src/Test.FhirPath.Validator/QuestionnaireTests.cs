@@ -311,7 +311,7 @@ namespace Test.Fhir.FhirPath.Validator
 			visitor.FocusedRootItem = visitor.QuestionnaireDefinition.Item[2];
 			var qProp = new FhirPathVisitorProps();
 			qProp.SetAnnotation(visitor.QuestionnaireDefinition);
-			qProp.Types.Add(new NodeProps(ModelInfo.ModelInspector.FindClassMapping("Quesitonnaire")));
+			qProp.Types.Add(new NodeProps(ModelInfo.ModelInspector.FindClassMapping("Questionnaire")));
 			visitor.RegisterVariable("questionnaire", qProp);
 
 			visitor.AddInputType(typeof(QuestionnaireResponse.ItemComponent)); // need to know WHICH item this is actually starting from
@@ -334,7 +334,7 @@ namespace Test.Fhir.FhirPath.Validator
 			visitor.QuestionnaireDefinition = GetQuestionnaire();
 			var qProp = new FhirPathVisitorProps();
 			qProp.SetAnnotation(visitor.QuestionnaireDefinition);
-			qProp.Types.Add(new NodeProps(ModelInfo.ModelInspector.FindClassMapping("Quesitonnaire")));
+			qProp.Types.Add(new NodeProps(ModelInfo.ModelInspector.FindClassMapping("Questionnaire")));
 			visitor.RegisterVariable("questionnaire", qProp);
 
 			visitor.AddInputType(typeof(QuestionnaireResponse));

@@ -371,23 +371,23 @@ namespace Test.Fhir.FhirPath.Validator
 						}
 						else
 						{
-						var actualItem = results.ElementAt(n);
-						// Check type
-						if (expectedItem.Type != NormalizeTypeName(actualItem.InstanceType))
-						{
-							missMatchingResults++;
-							Console.WriteLine($"Mismatch at index {n}: expected type {expectedItem.Type}, got {actualItem.InstanceType}");
-						}
-						else
-						{
-							// Check the data too
-							if (!DataEquals(expectedItem, actualItem))
+							var actualItem = results.ElementAt(n);
+							// Check type
+							if (expectedItem.Type != NormalizeTypeName(actualItem.InstanceType))
 							{
 								missMatchingResults++;
-								Console.WriteLine($"Mismatch at index {n}: expected value '{expectedItem.Text}', got '{actualItem.Value}'");
+								Console.WriteLine($"Mismatch at index {n}: expected type {expectedItem.Type}, got {actualItem.InstanceType}");
+							}
+							else
+							{
+								// Check the data too
+								if (!DataEquals(expectedItem, actualItem))
+								{
+									missMatchingResults++;
+									Console.WriteLine($"Mismatch at index {n}: expected value '{expectedItem.Text}', got '{actualItem.Value}'");
+								}
 							}
 						}
-					}
 					}
 					Assert.AreEqual(0, missMatchingResults, "Some results didn't match expected values");
 				}
@@ -445,13 +445,21 @@ namespace Test.Fhir.FhirPath.Validator
 			if (expectedItem.Type == "dateTime")
 			{
 				var expectedDateTime = Hl7.Fhir.ElementModel.Types.DateTime.Parse(expectedItem.Text.Substring(1));
-				var actualDateTime = Hl7.Fhir.ElementModel.Types.DateTime.Parse(actualItem.Value?.ToString());
+                // hacky workaround if someone is prefixing their FHIR data with @ too
+                var actualStringValue = actualItem.Value?.ToString();
+                if (actualStringValue?.StartsWith("@") == true)
+                    actualStringValue = actualStringValue.Substring(1);
+
+                var actualDateTime = Hl7.Fhir.ElementModel.Types.DateTime.Parse(actualStringValue);
 				return expectedDateTime.Equals(actualDateTime);
 			}
 			if (expectedItem.Type == "time")
 			{
 				var expectedDateTime = Hl7.Fhir.ElementModel.Types.Time.Parse(expectedItem.Text.Substring(2));
-				var actualDateTime = Hl7.Fhir.ElementModel.Types.Time.Parse(actualItem.Value?.ToString());
+                var actualStringValue = actualItem.Value?.ToString();
+                if (actualStringValue?.StartsWith("@T") == true)
+                    actualStringValue = actualStringValue.Substring(2);
+                var actualDateTime = Hl7.Fhir.ElementModel.Types.Time.Parse(actualStringValue);
 				return expectedDateTime.Equals(actualDateTime);
 			}
 			if (expectedItem.Type == "Quantity")
@@ -499,6 +507,7 @@ namespace Test.Fhir.FhirPath.Validator
 			testCase.Expression = expression;
 			testCase.FailureMessage = failureMessage;
 			if (failureMessage?.Contains("Not implemented") == true
+				|| failureMessage?.Contains("not yet implemented") == true
 				|| failureMessage?.Contains("Unhandled function '") == true
 				|| failureMessage?.Contains("No method in multimethod 'compile-node' for dispatch value: ") == true
 				)
@@ -747,6 +756,19 @@ namespace Test.Fhir.FhirPath.Validator
 
 				if (result is Parameters resultParams)
 				{
+                    var errorParams = resultParams.Parameter.FirstOrDefault(p => p.Name == "error");
+                    if (errorParams?.Value is FhirString strMessage)
+                    {
+                        var oc = new OperationOutcome();
+                        oc.Issue.Add(new OperationOutcome.IssueComponent() 
+                        {
+                            Severity = OperationOutcome.IssueSeverity.Error,
+                            Code = OperationOutcome.IssueType.Unknown,
+                            Details = new CodeableConcept() { Text = strMessage.Value } 
+                        });
+                        result = oc;
+                    }
+                    
 					var partParams = resultParams.Parameter.FirstOrDefault(p => p.Name == "parameters");
 					var partEngine = partParams?.Part.FirstOrDefault(p => p.Name == "evaluator")?.Value?.ToString();
 					if (!string.IsNullOrEmpty(partEngine))
@@ -809,17 +831,18 @@ namespace Test.Fhir.FhirPath.Validator
 				// Check the count of results is the same as the expected output
 				if (testData == null || testData.isPredicate == false)
 				{
-				if (testData.outputs != null && testData.outputs.Count > 0)
-				{
-					if (testData.outputs.Count != results.Count())
-						RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, false, $"Expected {testData.outputs.Count} results, got {results.Count()}");
-					Assert.AreEqual(testData.outputs.Count, results.Count(), $"Expected {testData.outputs.Count} results, got {results.Count()}");
-
-					// verify the values too
-					int missMatchingResults = 0;
-					for (int n = 0; n < testData.outputs.Count; n++)
+					if (testData.outputs != null && testData.outputs.Count > 0)
 					{
-						var expectedItem = testData.outputs[n];
+						if (testData.outputs.Count != results.Count())
+							RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, false, $"Expected {testData.outputs.Count} results, got {results.Count()}");
+						Assert.AreEqual(testData.outputs.Count, results.Count(), $"Expected {testData.outputs.Count} results, got {results.Count()}");
+
+						// verify the values too
+						int missMatchingResults = 0;
+						String errMessage;
+						for (int n = 0; n < testData.outputs.Count; n++)
+						{
+							var expectedItem = testData.outputs[n];
 							if (testData.ignoreOrder == true)
 							{
 								// loop through all the results
@@ -842,25 +865,25 @@ namespace Test.Fhir.FhirPath.Validator
 							}
 							else
 							{
-						var actualItem = results.ElementAt(n);
-						// Check type
-						if (expectedItem.Type == NormalizeTypeName(actualItem.InstanceType)
-							// JS engine can;t differentiate between a decimal that is an integer
-							|| (expectedItem.Type == "decimal" && actualItem.InstanceType == "integer"))
-						{
-							// Check the data too
-							if (!DataEquals(expectedItem, actualItem))
-							{
-								missMatchingResults++;
-								Console.WriteLine($"Mismatch at index {n}: expected value '{expectedItem.Text}', got '{actualItem.Value}'");
+								var actualItem = results.ElementAt(n);
+								// Check type
+								if (expectedItem.Type == NormalizeTypeName(actualItem.InstanceType)
+									// JS engine can;t differentiate between a decimal that is an integer
+									|| (expectedItem.Type == "decimal" && actualItem.InstanceType == "integer"))
+								{
+									// Check the data too
+									if (!DataEquals(expectedItem, actualItem))
+									{
+										missMatchingResults++;
+										Console.WriteLine($"Mismatch at index {n}: expected value '{expectedItem.Text}', got '{actualItem.Value}'");
+									}
+								}
+								else
+								{
+									missMatchingResults++;
+									Console.WriteLine($"Mismatch at index {n}: expected type {expectedItem.Type}, got {actualItem.InstanceType}");
+								}
 							}
-						}
-						else
-						{
-							missMatchingResults++;
-							Console.WriteLine($"Mismatch at index {n}: expected type {expectedItem.Type}, got {actualItem.InstanceType}");
-						}
-					}
 						}
 						if (testData.ignoreOrder == true)
 						{
@@ -871,21 +894,22 @@ namespace Test.Fhir.FhirPath.Validator
 								Console.WriteLine($"Included unexpected value '{actualItem.Value}'");
 							}
 						}
-					if (missMatchingResults != 0)
-						RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, false, $"Some results didn't match expected values ({missMatchingResults} values)");
+						if (missMatchingResults != 0)
+							RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, false, $"Some results didn't match expected values ({missMatchingResults} values)");
+						else
+							RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, true);
+						Assert.AreEqual(0, missMatchingResults, "Some results didn't match expected values");
+					}
 					else
-						RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, true);
-					Assert.AreEqual(0, missMatchingResults, "Some results didn't match expected values");
+					{
+						if (results.Any())
+							RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, false, "Expected no results, but got some.");
+						else
+							RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, true);
+						// if (testData.expressionValid == null)
+						Assert.IsFalse(results.Any(), "Expected no results, but got some.");
+					}
 				}
-				else
-				{
-					if (results.Any())
-						RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, false, "Expected no results, but got some.");
-					else
-						RecordResult(engineName, groupName, testName, testData.testDescription, testData.expression, true);
-					Assert.IsFalse(results.Any(), "Expected no results, but got some.");
-				}
-			}
 				else
 				{
 					// Predicate logic processing.
