@@ -15,6 +15,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Test.Fhir.R4B.FhirPath.Validator;
 using Test.Fhir.R5.FhirPath.Validator;
@@ -194,7 +195,7 @@ namespace Test.Fhir.FhirPath.Validator
 							if (t.InputFile?.EndsWith("json") == true)
 								r = jsonDS.DeserializeResource(content);
 							else
-								r = xmlDS.DeserializeResource(content);
+								r = DeserializeXmlResource(xmlDS, content);
 
 							var expression = t.Expression.Text;
 							//if (expression.Contains("//") || expression.Contains("/*") && expression.Contains("*/"))
@@ -220,6 +221,22 @@ namespace Test.Fhir.FhirPath.Validator
 					}
 				}
 				return result;
+			}
+		}
+
+		internal static Resource DeserializeXmlResource(FhirXmlPocoDeserializer xmlDS, string content)
+		{
+			// Some upstream example files (e.g. r5/parameters-example-html.xml) carry an
+			// xsi:schemaLocation attribute on the root element. The strict Firely XML parser
+			// fatally rejects this attribute, so strip the schema-hint attributes before parsing.
+			var xdoc = XDocument.Parse(content);
+			XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
+			xdoc.Descendants().Attributes()
+				.Where(a => a.Name == xsi + "schemaLocation" || a.Name == xsi + "noNamespaceSchemaLocation")
+				.Remove();
+			using (var reader = xdoc.CreateReader())
+			{
+				return xmlDS.DeserializeResource(reader);
 			}
 		}
 
@@ -251,6 +268,27 @@ namespace Test.Fhir.FhirPath.Validator
 			Assert.IsNotNull(tests.Groups, "Tests should contain groups");
 			Assert.IsTrue(tests.Groups.Count > 0, "Tests should contain at least one group");
 			Assert.IsFalse(string.IsNullOrEmpty(tests.Name), "Tests should have a name");
+		}
+
+		[TestMethod]
+		public async System.Threading.Tasks.Task TestDeserializeSchemaLocationExample()
+		{
+			// r5/parameters-example-html.xml carries xsi:schemaLocation on its root element,
+			// which the strict Firely XML parser rejects unless it is stripped first.
+			using var httpClient = new HttpClient();
+			var url = "https://raw.githubusercontent.com/FHIR/fhir-test-cases/master/r5/parameters-example-html.xml";
+			using var response = await httpClient.GetAsync(url);
+			response.EnsureSuccessStatusCode();
+
+			var content = await response.Content.ReadAsStringAsync();
+			StringAssert.Contains(content, "schemaLocation", "Upstream example should still carry xsi:schemaLocation");
+
+			var xmlSettings = new FhirXmlPocoDeserializerSettings() { Validator = null, AnnotateResourceParseExceptions = true, ValidateOnFailedParse = false };
+			var xmlDS = new FhirXmlPocoDeserializer(xmlSettings);
+			Resource r = DeserializeXmlResource(xmlDS, content);
+
+			Assert.IsNotNull(r, "Resource with xsi:schemaLocation should deserialize");
+			Assert.AreEqual("Parameters", r.TypeName);
 		}
 
 		[TestMethod]
