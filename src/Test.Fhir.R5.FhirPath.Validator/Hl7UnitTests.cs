@@ -103,6 +103,8 @@ namespace Test.Fhir.FhirPath.Validator
 			public string testDescription;
 			public string resourceType;
 			public string expression;
+			public string context;
+			public string contextType;
 			public bool? isPredicate;
 			public string expressionValid;
 			public string outputType;
@@ -209,6 +211,8 @@ namespace Test.Fhir.FhirPath.Validator
 								testDescription = t.Description,
 								resourceType = r.TypeName,
 								expression = t.Expression.Text,
+								context = t.Context,
+								contextType = t.ContextType,
 								isPredicate = t.Predicate,
 								expressionValid = t.Expression.Invalid,
 								emptyOutput = t.Outputs?.Count == 0,
@@ -720,6 +724,24 @@ namespace Test.Fhir.FhirPath.Validator
 				Name = "expression",
 				Value = new FhirString(testData.expression)
 			});
+			if (!string.IsNullOrEmpty(testData.context))
+			{
+				parameters.Parameter.Add(new Parameters.ParameterComponent()
+				{
+					Name = "context",
+					Value = new FhirString(testData.context)
+				});
+			}
+			// Not part of the fhirpath-lab API: the declared type(s) of the context focus,
+			// which the isSemanticChecks tests use to check type guards statically.
+			if (!string.IsNullOrEmpty(testData.contextType))
+			{
+				parameters.Parameter.Add(new Parameters.ParameterComponent()
+				{
+					Name = "contextType",
+					Value = new FhirString(testData.contextType)
+				});
+			}
 			parameters.Parameter.Add(new Parameters.ParameterComponent()
 			{
 				Name = "validate",

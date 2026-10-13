@@ -63,6 +63,14 @@ namespace Test.Fhir.R4B.FhirPath.Validator
         [XmlAttribute(AttributeName = "inputfile")]
         public string InputFile { get; set; }
 
+        /// <summary>Expression evaluated first; each result becomes the focus ($this) of the test expression.</summary>
+        [XmlAttribute(AttributeName = "context")]
+        public string Context { get; set; }
+
+        /// <summary>Declared type(s) of that focus, '|'-separated (e.g. 'Period|Timing'), used for semantic checks.</summary>
+        [XmlAttribute(AttributeName = "contextType")]
+        public string ContextType { get; set; }
+
         [XmlAttribute(AttributeName = "mode")]
         public string Mode { get; set; }
 
