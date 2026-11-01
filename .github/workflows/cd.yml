@@ -31,10 +31,12 @@ jobs:
           - os: windows-latest
             runtime: win-x64
             extension: .exe
-          # Temporarily disabled Linux and macOS builds
-          # - os: ubuntu-latest
-          #   runtime: linux-x64
-          #   extension: ""
+          # Linux is what HFS CI runs the validator on (its Test FHIRPath job
+          # downloads the linux-x64 archive), so this leg must stay enabled.
+          - os: ubuntu-latest
+            runtime: linux-x64
+            extension: ""
+          # macOS is still disabled: nothing consumes an osx-x64 build yet.
           # - os: macos-latest
           #   runtime: osx-x64
           #   extension: ""
@@ -239,18 +241,17 @@ jobs:
           - Static analysis tool for FhirPath expressions against FHIR specifications
           - Support for R4, R4B, and R5 FHIR versions
           - Console application for integration with CI/CD pipelines
-          - Cross-platform executables (Windows, Linux, macOS)
+          - Executables for Windows and Linux
           - Windows MSI installer for easy deployment
 
           ### Downloads
           - **Windows**: `fhirpath-validator-${{ steps.version.outputs.VERSION }}-win-x64.zip` or `fhirpath-validator-${{ steps.version.outputs.VERSION }}.msi`
           - **Linux**: `fhirpath-validator-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz`
-          - **macOS**: `fhirpath-validator-${{ steps.version.outputs.VERSION }}-osx-x64.tar.gz`
 
           ### Usage
           Extract the archive and run the executable:
           ```bash
-          # Linux/macOS
+          # Linux
           ./Test.Fhir.R5.FhirPath.Validator
 
           # Windows
