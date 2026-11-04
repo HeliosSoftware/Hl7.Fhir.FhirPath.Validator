@@ -111,6 +111,9 @@ namespace Test.Fhir.FhirPath.Validator
 			public bool? ignoreOrder;
 			public bool emptyOutput;
 			public Resource resource;
+			// The input file's text, so values Firely cannot round-trip (9.5e2) can be put back.
+			public string resourceContent;
+			public bool resourceContentIsJson;
 			public List<Output> outputs;
 		}
 
@@ -219,7 +222,9 @@ namespace Test.Fhir.FhirPath.Validator
 								ignoreOrder = t.Ordered == "false",
 								outputType = t.Outputs?.FirstOrDefault()?.Type,
 								outputs = t.Outputs,
-								resource = r
+								resource = r,
+								resourceContent = content,
+								resourceContentIsJson = t.InputFile?.EndsWith("json") == true
 							});
 						}
 					}
@@ -778,7 +783,10 @@ namespace Test.Fhir.FhirPath.Validator
 					HttpClient serverRaw = new HttpClient();
 					// set accept header for json
 					serverRaw.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/fhir+json"));
-					HttpContent content = new StringContent(parameters.ToJson(), System.Text.Encoding.UTF8, "application/fhir+json");
+					// Firely writes 9.5e2 as 950; restore the source text so the server sees the
+					// precision in the mantissa (HeliosSoftware/hfs#2173).
+					var requestJson = DecimalLiteralPreserver.PatchRequest(parameters.ToJson(), testData.resourceContent, testData.resourceContentIsJson);
+					HttpContent content = new StringContent(requestJson, System.Text.Encoding.UTF8, "application/fhir+json");
 					var rawResult = serverRaw.PostAsync(serverDetails.ServerUrl, content).WaitResult();
 					if (rawResult.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
 						Assert.Inconclusive($"Service Unavailable");
