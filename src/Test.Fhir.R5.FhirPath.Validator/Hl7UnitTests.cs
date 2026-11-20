@@ -196,11 +196,7 @@ namespace Test.Fhir.FhirPath.Validator
 							else
 								content = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"pat1\"/></Patient>";
 
-							Resource r = null;
-							if (t.InputFile?.EndsWith("json") == true)
-								r = jsonDS.DeserializeResource(content);
-							else
-								r = DeserializeXmlResource(xmlDS, content);
+							Resource r = DeserializeTestInput(jsonDS, xmlDS, content, t.InputFile);
 
 							var expression = t.Expression.Text;
 							//if (expression.Contains("//") || expression.Contains("/*") && expression.Contains("*/"))
@@ -230,6 +226,27 @@ namespace Test.Fhir.FhirPath.Validator
 					}
 				}
 				return result;
+			}
+		}
+
+		/// <summary>
+		/// Parse one test input file into a POCO. A value the POCO cannot hold (a decimal
+		/// such as <c>1e999999999</c>, beyond <see cref="decimal"/>) must not abort the whole
+		/// run: Firely's partial result keeps that value as its literal text, and
+		/// <see cref="DecimalLiteralPreserver"/> sends it to the server as a JSON number again.
+		/// </summary>
+		internal static Resource DeserializeTestInput(FhirJsonPocoDeserializer jsonDS, FhirXmlPocoDeserializer xmlDS, string content, string inputFile)
+		{
+			try
+			{
+				if (inputFile?.EndsWith("json") == true)
+					return jsonDS.DeserializeResource(content);
+				return DeserializeXmlResource(xmlDS, content);
+			}
+			catch (DeserializationFailedException ex) when (ex.PartialResult is Resource partial)
+			{
+				Console.Error.WriteLine($"Note: input file '{inputFile}' has values the Firely model cannot hold; using the partial result, which keeps their text. {ex.Message}");
+				return partial;
 			}
 		}
 

@@ -114,5 +114,84 @@ namespace Test.Fhir.R5.FhirPath.Validator
 			var request = Request(ParseXml(DecimalsXml));
 			Assert.AreEqual(request, DecimalLiteralPreserver.PatchRequest(request, "<not xml", false));
 		}
+
+		// Same shape as fhir-test-cases r5/parameters-example-large-exponents.xml (2026-11-20).
+		const string LargeExponentsXml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Parameters xmlns=""http://hl7.org/fhir"">
+	<id value=""example-large-exponents""/>
+	<parameter>
+		<name value=""huge-quantity""/>
+		<valueQuantity>
+			<value value=""1e999999999""/>
+			<unit value=""kg""/>
+			<system value=""http://unitsofmeasure.org""/>
+			<code value=""kg""/>
+		</valueQuantity>
+	</parameter>
+	<parameter>
+		<name value=""tiny-quantity""/>
+		<valueQuantity>
+			<value value=""1e-999999999""/>
+			<unit value=""kg""/>
+		</valueQuantity>
+	</parameter>
+	<parameter>
+		<name value=""huge-decimal""/>
+		<valueDecimal value=""1e999999999""/>
+	</parameter>
+	<parameter>
+		<name value=""tiny-decimal""/>
+		<valueDecimal value=""1e-999999999""/>
+	</parameter>
+</Parameters>";
+
+		static Resource ParseTestInput(string content, string inputFile)
+		{
+			var xmlSettings = new FhirXmlPocoDeserializerSettings() { Validator = null, AnnotateResourceParseExceptions = true, ValidateOnFailedParse = false };
+			var jsonSettings = new FhirJsonPocoDeserializerSettings() { Validator = null, AnnotateResourceParseExceptions = true, ValidateOnFailedParse = false };
+			return Test.Fhir.FhirPath.Validator.Hl7UnitTestFileR5.DeserializeTestInput(
+				new FhirJsonPocoDeserializer(jsonSettings), new FhirXmlPocoDeserializer(xmlSettings), content, inputFile);
+		}
+
+		[TestMethod]
+		public void AHugeExponentDoesNotAbortTheInputFile()
+		{
+			var resource = ParseTestInput(LargeExponentsXml, "parameters-example-large-exponents.xml");
+			Assert.AreEqual("Parameters", resource.TypeName);
+			Assert.AreEqual(4, ((Parameters)resource).Parameter.Count);
+		}
+
+		[TestMethod]
+		public void AHugeExponentIsSentToTheServerAsWritten()
+		{
+			var resource = ParseTestInput(LargeExponentsXml, "parameters-example-large-exponents.xml");
+			var patched = DecimalLiteralPreserver.PatchRequest(Request(resource), LargeExponentsXml, false);
+			var p = InputParameters(patched);
+			Assert.AreEqual("1e999999999", p[0]["valueQuantity"]["value"].ToJsonString());
+			Assert.AreEqual("\"kg\"", p[0]["valueQuantity"]["unit"].ToJsonString());
+			Assert.AreEqual("1e-999999999", p[1]["valueQuantity"]["value"].ToJsonString());
+			Assert.AreEqual("1e999999999", p[2]["valueDecimal"].ToJsonString());
+			Assert.AreEqual("1e-999999999", p[3]["valueDecimal"].ToJsonString());
+		}
+
+		[TestMethod]
+		public void AHugeExponentInJsonInputIsSentAsWritten()
+		{
+			const string json = @"{""resourceType"":""Parameters"",""parameter"":[{""name"":""huge"",""valueDecimal"":1e999999999},{""name"":""plain"",""valueDecimal"":1.50}]}";
+			var resource = ParseTestInput(json, "parameters-example-large-exponents.json");
+			var patched = DecimalLiteralPreserver.PatchRequest(Request(resource), json, true);
+			var p = InputParameters(patched);
+			Assert.AreEqual("1e999999999", p[0]["valueDecimal"].ToJsonString());
+			Assert.AreEqual("1.50", p[1]["valueDecimal"].ToJsonString());
+		}
+
+		[TestMethod]
+		public void OnlyUnrepresentableNumbersAreRestored()
+		{
+			Assert.IsNull(DecimalLiteralPreserver.Unrepresentable("1.5"));
+			Assert.IsNull(DecimalLiteralPreserver.Unrepresentable("abc"));
+			Assert.IsNull(DecimalLiteralPreserver.Unrepresentable(""));
+			Assert.AreEqual("1e999999999", DecimalLiteralPreserver.Unrepresentable("1e999999999").ToJsonString());
+		}
 	}
 }
