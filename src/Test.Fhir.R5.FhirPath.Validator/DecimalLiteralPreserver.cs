@@ -164,12 +164,41 @@ namespace Test.Fhir.R5.FhirPath.Validator
 		// ---- shared -----------------------------------------------------------------
 
 		/// <summary>
+		/// The source text as a JSON number when it is a valid number that a .NET
+		/// <see cref="decimal"/> cannot hold (e.g. <c>1e999999999</c>); otherwise null, so a
+		/// string that only looks numeric, or any value a decimal can hold, is left alone.
+		/// </summary>
+		internal static JsonNode Unrepresentable(string raw)
+		{
+			if (string.IsNullOrEmpty(raw)
+				|| decimal.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+				return null;
+			try
+			{
+				using var doc = JsonDocument.Parse(raw);
+				if (doc.RootElement.ValueKind != JsonValueKind.Number)
+					return null;
+				return JsonValue.Create(doc.RootElement.Clone());
+			}
+			catch (JsonException)
+			{
+				return null;
+			}
+		}
+
+		/// <summary>
 		/// The source text as a JSON number, if the target is a JSON number with the same
 		/// value but different text; otherwise null.
 		/// </summary>
 		static JsonNode Replacement(string raw, JsonNode target)
 		{
-			if (target is not JsonValue value || value.GetValueKind() != JsonValueKind.Number)
+			if (target is not JsonValue value)
+				return null;
+			// A number a .NET decimal cannot hold (1e999999999) stays in Firely's partial
+			// result as its literal text, and is written out as a JSON string.
+			if (value.GetValueKind() == JsonValueKind.String)
+				return value.GetValue<string>() == raw ? Unrepresentable(raw) : null;
+			if (value.GetValueKind() != JsonValueKind.Number)
 				return null;
 			var current = value.ToJsonString();
 			if (current == raw)
